@@ -1,22 +1,33 @@
 import os
-import psycopg2
-import psycopg2.extras
+import pymysql
+import pymysql.cursors
+from werkzeug.security import generate_password_hash
+from config import Config
+import pymysql
+import pymysql.cursors
 from werkzeug.security import generate_password_hash
 from config import Config
 
 
+class DictCursor(pymysql.cursors.DictCursor):
+    """Cursor que retorna resultados como diccionarios (compatible con sqlite3.Row)"""
+    pass
+
+
 def get_db_connection():
-    """Establece y retorna una conexión a PostgreSQL"""
+    """Establece y retorna una conexión a la base de datos MariaDB/MySQL"""
     try:
-        conn = psycopg2.connect(
+        conn = pymysql.connect(
             host=Config.DB_HOST,
             user=Config.DB_USER,
             password=Config.DB_PASSWORD,
             database=Config.DB_NAME,
-            port=Config.DB_PORT
+            charset='utf8mb4',
+            cursorclass=DictCursor,
+            autocommit=False
         )
         return conn
-    except psycopg2.Error as e:
+    except pymysql.Error as e:
         print(f"Error al conectar a la base de datos: {e}")
         raise
 
@@ -29,142 +40,142 @@ def init_db():
     # Crear tabla de usuarios
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS usuarios (
-            ID_Usuario INT SERIAL PRIMARY KEY,
+            ID_Usuario INT AUTO_INCREMENT PRIMARY KEY,
             Usuario VARCHAR(255) UNIQUE NOT NULL,
             Contrasena TEXT NOT NULL,
             Rol VARCHAR(20) NOT NULL CHECK (Rol IN ('admin', 'docente', 'estudiante'))
-        )
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     ''')
 
     # Crear tabla de niveles
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS niveles (
-            ID_Nivel INT SERIAL PRIMARY KEY,
+            ID_Nivel INT AUTO_INCREMENT PRIMARY KEY,
             Nombre_Nivel VARCHAR(255) NOT NULL
-        )
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     ''')
 
     # Crear tabla de areas
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS areas (
-            ID_Area INT SERIAL PRIMARY KEY,
+            ID_Area INT AUTO_INCREMENT PRIMARY KEY,
             Nombre_Area VARCHAR(255) NOT NULL UNIQUE,
             Orden INT DEFAULT 0
-        )
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     ''')
 
     # Crear tabla de grupos
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS grupos (
-            ID_Grupo INT SERIAL PRIMARY KEY,
+            ID_Grupo INT AUTO_INCREMENT PRIMARY KEY,
             Nombre_Grupo VARCHAR(255) NOT NULL,
             ID_Nivel INT,
             FOREIGN KEY (ID_Nivel) REFERENCES niveles(ID_Nivel)
-        )
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     ''')
 
     # Crear tabla de materias
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS materias (
-            ID_Materia INT SERIAL PRIMARY KEY,
+            ID_Materia INT AUTO_INCREMENT PRIMARY KEY,
             Nombre_Materia VARCHAR(255) NOT NULL,
             ID_Area INT,
             Es_DIM INT DEFAULT 0,
             FOREIGN KEY (ID_Area) REFERENCES areas(ID_Area)
-        )
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     ''')
 
     # Crear tabla de plan de estudios
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS plan_estudios (
-            ID_Plan INT SERIAL PRIMARY KEY,
+            ID_Plan INT AUTO_INCREMENT PRIMARY KEY,
             ID_Grupo INT NOT NULL,
             ID_Materia INT NOT NULL,
             FOREIGN KEY (ID_Grupo) REFERENCES grupos(ID_Grupo),
             FOREIGN KEY (ID_Materia) REFERENCES materias(ID_Materia),
             UNIQUE(ID_Grupo, ID_Materia)
-        )
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     ''')
 
     # Crear tabla de estudiantes
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS estudiantes (
-            ID_Estudiante INT SERIAL PRIMARY KEY,
+            ID_Estudiante INT AUTO_INCREMENT PRIMARY KEY,
             Nombres VARCHAR(255) NOT NULL,
             Apellidos VARCHAR(255) NOT NULL,
             ID_Grupo INT,
             ID_Usuario INT,
             FOREIGN KEY (ID_Grupo) REFERENCES grupos(ID_Grupo),
             FOREIGN KEY (ID_Usuario) REFERENCES usuarios(ID_Usuario)
-        )
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     ''')
 
     # Crear tabla de docentes
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS docentes (
-            ID_Docente INT SERIAL PRIMARY KEY,
+            ID_Docente INT AUTO_INCREMENT PRIMARY KEY,
             Nombres VARCHAR(255) NOT NULL,
             Apellidos VARCHAR(255) NOT NULL,
             ID_Usuario INT,
             Firma_URL VARCHAR(255),
             FOREIGN KEY (ID_Usuario) REFERENCES usuarios(ID_Usuario)
-        )
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     ''')
 
     # Crear tabla de cargas académicas
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS cargas_academicas (
-            ID_Carga INT SERIAL PRIMARY KEY,
+            ID_Carga INT AUTO_INCREMENT PRIMARY KEY,
             ID_Docente INT,
             ID_Materia INT,
             ID_Grupo INT,
             FOREIGN KEY (ID_Docente) REFERENCES docentes(ID_Docente),
             FOREIGN KEY (ID_Materia) REFERENCES materias(ID_Materia),
             FOREIGN KEY (ID_Grupo) REFERENCES grupos(ID_Grupo)
-        )
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     ''')
 
     # Crear tabla de notas
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS notas (
-            ID_Nota INT SERIAL PRIMARY KEY,
+            ID_Nota INT AUTO_INCREMENT PRIMARY KEY,
             ID_Estudiante INT,
             ID_Carga INT,
             Periodo INT DEFAULT 1,
             Tipo VARCHAR(20) CHECK (Tipo IN ('eval', 'tarea')),
             Numero INT CHECK (Numero BETWEEN 1 AND 10),
-            Nota NUMERIC,
+            Nota DOUBLE,
             FOREIGN KEY (ID_Estudiante) REFERENCES estudiantes(ID_Estudiante),
             FOREIGN KEY (ID_Carga) REFERENCES cargas_academicas(ID_Carga)
-        )
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     ''')
 
     # Tabla de indicadores por estudiante
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS indicadores_logro (
-            ID_Indicador INT SERIAL PRIMARY KEY,
+            ID_Indicador INT AUTO_INCREMENT PRIMARY KEY,
             ID_Carga INT NOT NULL,
             ID_Estudiante INT NOT NULL,
             Periodo INT NOT NULL,
-            Logros TEXT,
-            Dificultades TEXT,
-            Recomendaciones TEXT,
+            Logros LONGTEXT,
+            Dificultades LONGTEXT,
+            Recomendaciones LONGTEXT,
             FOREIGN KEY (ID_Carga) REFERENCES cargas_academicas(ID_Carga),
             FOREIGN KEY (ID_Estudiante) REFERENCES estudiantes(ID_Estudiante),
             UNIQUE(ID_Carga, ID_Estudiante, Periodo)
-        )
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     ''')
 
     # Indicadores unificados por planilla/grupo
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS indicadores_planilla (
-            ID_Indicador_Planilla INT SERIAL PRIMARY KEY,
+            ID_Indicador_Planilla INT AUTO_INCREMENT PRIMARY KEY,
             ID_Carga INT NOT NULL,
             Periodo INT NOT NULL,
-            Indicadores TEXT,
+            Indicadores LONGTEXT,
             FOREIGN KEY (ID_Carga) REFERENCES cargas_academicas(ID_Carga),
             UNIQUE(ID_Carga, Periodo)
-        )
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     ''')
 
     # Tabla de configuración
@@ -172,44 +183,44 @@ def init_db():
         CREATE TABLE IF NOT EXISTS configuracion (
             Clave VARCHAR(255) PRIMARY KEY,
             Valor TEXT NOT NULL
-        )
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     ''')
 
     # Observaciones y fallas por estudiante y período
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS observador_estudiante (
-            ID_Obs INT SERIAL PRIMARY KEY,
+            ID_Obs INT AUTO_INCREMENT PRIMARY KEY,
             ID_Estudiante INT NOT NULL,
             Periodo INT NOT NULL,
-            Observacion TEXT,
+            Observacion LONGTEXT,
             Fallas INT DEFAULT 0,
             Fecha_Registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (ID_Estudiante) REFERENCES estudiantes(ID_Estudiante),
             UNIQUE(ID_Estudiante, Periodo)
-        )
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     ''')
 
     # Concepto final anual y promoción del estudiante
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS observador_anual (
-            ID_Anual INT SERIAL PRIMARY KEY,
+            ID_Anual INT AUTO_INCREMENT PRIMARY KEY,
             ID_Estudiante INT NOT NULL UNIQUE,
-            Observaciones_Generales TEXT,
+            Observaciones_Generales LONGTEXT,
             Concepto_Final VARCHAR(255),
             Promovido_A VARCHAR(255),
             FOREIGN KEY (ID_Estudiante) REFERENCES estudiantes(ID_Estudiante)
-        )
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     ''')
 
     # Titular de cada grupo (docente responsable del grupo)
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS titulares_grupo (
-            ID_Titular INT SERIAL PRIMARY KEY,
+            ID_Titular INT AUTO_INCREMENT PRIMARY KEY,
             ID_Grupo INT NOT NULL UNIQUE,
             ID_Docente INT NOT NULL,
             FOREIGN KEY (ID_Grupo) REFERENCES grupos(ID_Grupo),
             FOREIGN KEY (ID_Docente) REFERENCES docentes(ID_Docente)
-        )
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     ''')
 
     # Índices
@@ -252,7 +263,7 @@ def init_db():
 
     # Migración: separar plan de estudios de la carga académica
     cursor.execute('''
-        INSERT INTO plan_estudios (ID_Grupo, ID_Materia)
+        INSERT IGNORE INTO plan_estudios (ID_Grupo, ID_Materia)
         SELECT DISTINCT ID_Grupo, ID_Materia
         FROM cargas_academicas
         WHERE ID_Grupo IS NOT NULL AND ID_Materia IS NOT NULL
@@ -260,7 +271,7 @@ def init_db():
 
     # Migración: unificar indicadores para toda la planilla/grupo
     cursor.execute('''
-        INSERT INTO indicadores_planilla (ID_Carga, Periodo, Indicadores)
+        INSERT IGNORE INTO indicadores_planilla (ID_Carga, Periodo, Indicadores)
         SELECT il.ID_Carga, il.Periodo, il.Logros
         FROM indicadores_logro il
         JOIN (
@@ -280,7 +291,7 @@ def init_db():
             'INSERT INTO usuarios (Usuario, Contrasena, Rol) VALUES (%s, %s, %s)',
             ('admin', generate_password_hash('admin123'), 'admin')
         )
-        cursor.execute("INSERT INTO configuracion (Clave, Valor) VALUES (%s, %s)", ('periodo_activo', '1'))
+        cursor.execute("INSERT IGNORE INTO configuracion (Clave, Valor) VALUES (%s, %s)", ('periodo_activo', '1'))
         conn.commit()
         print("✓ Usuario admin creado (admin / admin123)")
 
@@ -410,7 +421,7 @@ def _insertar_datos_prueba(cursor):
         (id_grupo_prejardin, id_materia_mate),
     ]
     for plan in planes:
-        cursor.execute('INSERT INTO plan_estudios (ID_Grupo, ID_Materia) VALUES (%s, %s)', plan)
+        cursor.execute('INSERT IGNORE INTO plan_estudios (ID_Grupo, ID_Materia) VALUES (%s, %s)', plan)
 
     # Insertar cargas académicas de prueba
     cargas = [
@@ -439,7 +450,7 @@ def set_periodo_activo(periodo):
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute(
-        "INSERT INTO configuracion (Clave, Valor) VALUES (%s, %s) ON CONFLICT (Clave) DO UPDATE SET Valor=%s",
+        "INSERT INTO configuracion (Clave, Valor) VALUES (%s, %s) ON DUPLICATE KEY UPDATE Valor=%s",
         ('periodo_activo', str(periodo), str(periodo)),
     )
     conn.commit()
@@ -447,15 +458,10 @@ def set_periodo_activo(periodo):
 
 
 if __name__ == '__main__':
-    if os.path.exists(DB_PATH):
-        os.remove(DB_PATH)
-        print("✓ Base de datos anterior eliminada")
-
     init_db()
     print("=" * 50)
     print("🎓 Base de datos inicializada")
     print("=" * 50)
     print("👥 Usuarios de prueba:")
     print("   Admin:   admin / admin123")
-    print("   Docente: docente1 / 123456")
     print("=" * 50)
