@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestión de Estudiantes | SIEE</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h2>Panel de Gestión de Estudiantes</h2>
+        
+        <div class="admin-actions" style="margin-bottom: 20px;">
+            <form action="{{ url_for('boletin_bp.informe_final_lote_admin_seleccion') }}" method="POST" class="form-inline">
+                <select name="id_grupo" class="form-control" required>
+                    <option value="">Seleccionar Grupo para Informes Finales...</option>
+                    {% for grupo in grupos %}
+                    <option value="{{ grupo.ID_Grupo }}">{{ grupo.Nombre_Grupo }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="btn btn-secondary">🖨️ Generar Lote Final</button>
+            </form>
+        </div>
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Apellidos y Nombres</th>
+                    <th>Grupo</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for estudiante in estudiantes %}
+                <tr>
+                    <td>{{ estudiante.Apellidos }} {{ estudiante.Nombres }}</td>
+                    <td>{{ estudiante.Nombre_Grupo }}</td>
+                    <td>
+                        <a href="{{ url_for('estudiantes_bp.editar_estudiante', id=estudiante.ID_Estudiante) }}" class="btn btn-sm">Editar</a>
+                        <a href="{{ url_for('boletin_bp.informe_final', id_estudiante=estudiante.ID_Estudiante) }}" 
+                           class="btn btn-sm btn-dark" style="background-color: #2c3e50; color: white;">
+                           🎓 Informe Final
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

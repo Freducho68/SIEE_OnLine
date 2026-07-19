@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Carga Académica</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Select2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+    <style>
+        body {
+            background: #f0f2f5;
+        }
+        .btn-carga {
+            transition: all 0.3s ease;
+        }
+        .btn-carga:hover {
+            transform: translateY(-2px);
+        }
+        .table-carga th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-custom {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+        }
+        .btn-custom:hover {
+            transform: translateY(-2px);
+            color: white;
+        }
+        .card-carga {
+            border-left: 4px solid;
+            transition: all 0.3s ease;
+        }
+        .card-carga:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .badge-dim {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+            color: #c0392b;
+        }
+        .badge-normal {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            color: #2980b9;
+        }
+        /* Select2 personalizado */
+        .select2-container--bootstrap-5 .select2-selection {
+            border-radius: 8px;
+            border-color: #ddd;
+            min-height: 38px;
+        }
+        .select2-container {
+            z-index: 9999 !important;
+        }
+        .select2-dropdown {
+            z-index: 10000 !important;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-dark bg-dark mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('admin_bp.panel') }}">
+                <i class="fas fa-arrow-left me-2"></i>Volver al Panel
+            </a>
+            <span class="navbar-text">
+                <i class="fas fa-tasks me-2"></i>Gestión de Carga Académica
+            </span>
+        </div>
+    </nav>
+
+    <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-triangle' }} me-2"></i>
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="card shadow">
+            <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-list me-2"></i>Cargas Académicas Asignadas</h5>
+                <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#modalCrearCarga">
+                    <i class="fas fa-plus me-1"></i>Nueva Carga
+                </button>
+            </div>
+            <div class="card-body">
+                {% if cargas %}
+                <div class="table-responsive">
+                    <table class="table table-hover table-carga">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th><i class="fas fa-chalkboard-teacher me-1"></i>Docente</th>
+                                <th><i class="fas fa-book me-1"></i>Materia</th>
+                                <th><i class="fas fa-users me-1"></i>Grupo</th>
+                                <th><i class="fas fa-layer-group me-1"></i>Nivel</th>
+                                <th><i class="fas fa-cogs me-1"></i>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for carga in cargas %}
+                            <tr class="card-carga" style="border-left-color: #2c7be5;">
+                                <td>{{ carga.ID_Carga }}</td>
+                                <td>
+                                    <i class="fas fa-user-graduate me-1"></i>
+                                    {{ carga.Docente_Nombres }} {{ carga.Docente_Apellidos }}
+                                 </td>
+                                <td>
+                                    {% if carga.Nombre_Materia.upper().startswith('DIM') %}
+                                        <span class="badge-dim badge px-2 py-1">
+                                            <i class="fas fa-child me-1"></i>{{ carga.Nombre_Materia }}
+                                        </span>
+                                    {% else %}
+                                        <span class="badge-normal badge px-2 py-1">
+                                            <i class="fas fa-graduation-cap me-1"></i>{{ carga.Nombre_Materia }}
+                                        </span>
+                                    {% endif %}
+                                 </td>
+                                <td>{{ carga.Nombre_Grupo }}</td>
+                                <td>
+                                    {% if carga.Nombre_Nivel %}
+                                        <span class="badge bg-info">{{ carga.Nombre_Nivel }}</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Sin nivel</span>
+                                    {% endif %}
+                                 </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a href="{{ url_for('carga_bp.ver_planilla', id_carga=carga.ID_Carga) }}" 
+                                           class="btn btn-sm btn-info btn-carga" title="Ver Planilla">
+                                            <i class="fas fa-edit me-1"></i>Planilla
+                                        </a>
+                                        <button type="button" class="btn btn-sm btn-warning btn-carga"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#modalReasignarCarga"
+                                                data-id="{{ carga.ID_Carga }}"
+                                                data-docente-id="{{ carga.ID_Docente }}"
+                                                data-docente="{{ carga.Docente_Nombres }} {{ carga.Docente_Apellidos }}"
+                                                data-materia="{{ carga.Nombre_Materia }}"
+                                                data-grupo="{{ carga.Nombre_Grupo }}">
+                                            <i class="fas fa-user-pen me-1"></i>Reasignar
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-danger btn-carga"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#modalEliminarCarga"
+                                                data-id="{{ carga.ID_Carga }}"
+                                                data-docente="{{ carga.Docente_Nombres }} {{ carga.Docente_Apellidos }}"
+                                                data-materia="{{ carga.Nombre_Materia }}"
+                                                data-grupo="{{ carga.Nombre_Grupo }}">
+                                            <i class="fas fa-trash me-1"></i>Eliminar
+                                        </button>
+                                    </div>
+                                 </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-info text-center">
+                    <i class="fas fa-info-circle me-2"></i>
+                    No hay cargas académicas registradas.
+                    <button type="button" class="btn btn-sm btn-primary ms-3" data-bs-toggle="modal" data-bs-target="#modalCrearCarga">
+                        <i class="fas fa-plus me-1"></i>Crear la primera carga
+                    </button>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Tarjetas informativas -->
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="card card-carga border-info">
+                    <div class="card-body">
+                        <i class="fas fa-info-circle fa-2x float-end text-info"></i>
+                        <h6><i class="fas fa-question-circle me-2"></i>¿Qué es la Carga Académica?</h6>
+                        <p class="small text-muted mb-0">La carga académica asigna un <strong>Docente</strong> a una <strong>Materia</strong> en un <strong>Grupo</strong> específico. Cada combinación debe ser única.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card card-carga border-warning">
+                    <div class="card-body">
+                        <i class="fas fa-exclamation-triangle fa-2x float-end text-warning"></i>
+                        <h6><i class="fas fa-lightbulb me-2"></i>Nota importante</h6>
+                        <p class="small text-muted mb-0">Si eliminas una carga académica que ya tiene notas registradas, no podrás eliminarla hasta que las notas sean removidas.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Crear Carga con Select2 -->
+    <div class="modal fade" id="modalCrearCarga" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-plus-circle me-2"></i>Nueva Carga Académica</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="POST" action="{{ url_for('carga_bp.crear_carga') }}" id="formCrearCarga">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Docente <span class="text-danger">*</span></label>
+                            <select name="id_docente" id="id_docente" class="form-select" style="width: 100%;">
+                                <option value="">Seleccionar docente</option>
+                                {% for docente in docentes %}
+                                    <option value="{{ docente.ID_Docente }}">
+                                        {{ docente.Apellidos }} {{ docente.Nombres }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Grupo <span class="text-danger">*</span></label>
+                            <select name="id_grupo" id="id_grupo" class="form-select" style="width: 100%;">
+                                <option value="">Seleccionar grupo</option>
+                                {% for grupo in grupos %}
+                                    <option value="{{ grupo.ID_Grupo }}">
+                                        {{ grupo.Nombre_Grupo }} {% if grupo.Nombre_Nivel %}({{ grupo.Nombre_Nivel }}){% endif %}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Materia <span class="text-danger">*</span></label>
+                            <select name="id_materia" id="id_materia" class="form-select" style="width: 100%;">
+                                <option value="">Primero selecciona un grupo</option>
+                            </select>
+                            <small class="text-muted" id="materias_disponibles_msg"></small>
+                        </div>
+                        <div class="alert alert-warning mt-2" id="alertaMaterias" style="display: none;">
+                            <i class="fas fa-info-circle me-1"></i>
+                            <small>Este grupo ya tiene algunas materias asignadas. Las materias ya asignadas no aparecerán en la lista.</small>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-custom">Crear Carga</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Modal Reasignar Carga -->
+    <div class="modal fade" id="modalReasignarCarga" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title"><i class="fas fa-user-pen me-2"></i>Reasignar Docente</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="POST" id="formReasignarCarga">
+                    <div class="modal-body">
+                        <div class="alert alert-secondary">
+                            <strong id="reasignar_detalle"></strong>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Nuevo docente <span class="text-danger">*</span></label>
+                            <select name="id_docente" id="reasignar_id_docente" class="form-select" style="width: 100%;">
+                                <option value="">Seleccionar docente</option>
+                                {% for docente in docentes %}
+                                    <option value="{{ docente.ID_Docente }}">{{ docente.Apellidos }} {{ docente.Nombres }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-warning">Guardar reasignación</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Eliminar Carga -->
+    <div class="modal fade" id="modalEliminarCarga" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title"><i class="fas fa-exclamation-triangle me-2"></i>Eliminar Carga Académica</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>¿Estás seguro de que deseas eliminar esta carga académica?</p>
+                    <div class="alert alert-secondary">
+                        <strong>📋 Detalles:</strong><br>
+                        <span id="delete_docente"></span><br>
+                        <span id="delete_materia"></span><br>
+                        <span id="delete_grupo"></span>
+                    </div>
+                    <p class="text-danger"><small><i class="fas fa-info-circle me-1"></i>Esta acción no se puede deshacer.</small></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <a href="#" id="btnEliminarCarga" class="btn btn-danger">Eliminar</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Select2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script>
+        // Inicializar Select2 cuando el modal se abre
+        $('#modalCrearCarga').on('shown.bs.modal', function() {
+            $('#id_docente').select2({
+                theme: 'bootstrap-5',
+                placeholder: 'Buscar docente...',
+                allowClear: true,
+                width: '100%',
+                dropdownParent: $('#modalCrearCarga')
+            });
+            
+            $('#id_grupo').select2({
+                theme: 'bootstrap-5',
+                placeholder: 'Buscar grupo...',
+                allowClear: true,
+                width: '100%',
+                dropdownParent: $('#modalCrearCarga')
+            });
+            
+            $('#id_materia').select2({
+                theme: 'bootstrap-5',
+                placeholder: 'Buscar materia...',
+                allowClear: true,
+                width: '100%',
+                dropdownParent: $('#modalCrearCarga')
+            });
+
+            $('#reasignar_id_docente').select2({
+                theme: 'bootstrap-5',
+                placeholder: 'Buscar docente...',
+                allowClear: true,
+                width: '100%',
+                dropdownParent: $('#modalReasignarCarga')
+            });
+        });
+        
+        // Cargar materias disponibles según el grupo seleccionado
+        const grupoSelect = document.getElementById('id_grupo');
+        const materiaSelect = document.getElementById('id_materia');
+        const alertaMaterias = document.getElementById('alertaMaterias');
+        const materiasDisponiblesMsg = document.getElementById('materias_disponibles_msg');
+        const todasMaterias = {{ materias | tojson | safe }};
+        
+        grupoSelect.addEventListener('change', function() {
+            const grupoId = this.value;
+            
+            if (!grupoId) {
+                materiaSelect.innerHTML = '<option value="">Primero selecciona un grupo</option>';
+                alertaMaterias.style.display = 'none';
+                materiasDisponiblesMsg.textContent = '';
+                return;
+            }
+            
+            fetch(`/carga/obtener_materias_por_grupo/${grupoId}`)
+                .then(response => response.json())
+                .then(materiasGrupo => {
+                    const materiasDisponibles = materiasGrupo.filter(m => !m.asignada);
+                    const materiasAsignadas = materiasGrupo.filter(m => m.asignada);
+                    
+                    if (materiasDisponibles.length === 0) {
+                        materiaSelect.innerHTML = '<option value="">No hay materias del plan de estudios pendientes por asignar</option>';
+                        materiaSelect.disabled = true;
+                        materiasDisponiblesMsg.textContent = 'Todas las materias del plan de estudios ya tienen docente asignado o el grupo aún no tiene plan de estudios cargado.';
+                        alertaMaterias.style.display = 'block';
+                    } else {
+                        let options = '<option value="">Seleccionar materia</option>';
+                        materiasDisponibles.forEach(materia => {
+                            const esDim = materia.Nombre_Materia.toUpperCase().startsWith('DIM');
+                            const icono = esDim ? '🎨' : '📖';
+                            options += `<option value="${materia.ID_Materia}">${icono} ${materia.Nombre_Materia}</option>`;
+                        });
+                        materiaSelect.innerHTML = options;
+                        materiaSelect.disabled = false;
+                        materiasDisponiblesMsg.textContent = `${materiasDisponibles.length} materia(s) del plan de estudios disponible(s) para asignar.`;
+                        alertaMaterias.style.display = materiasAsignadas.length > 0 || materiasDisponibles.length === 0 ? 'block' : 'none';
+                    }
+                    
+                    if (materiasAsignadas.length > 0) {
+                        const materiasNombres = materiasAsignadas.map(m => m.docente ? `${m.Nombre_Materia} (${m.docente})` : m.Nombre_Materia).join(', ');
+                        materiasDisponiblesMsg.innerHTML += `<br><small class="text-warning">⚠️ Ya asignadas a docente: ${materiasNombres}</small>`;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    materiaSelect.innerHTML = '<option value="">Error al cargar materias</option>';
+                });
+        });
+        
+
+        const modalReasignar = document.getElementById('modalReasignarCarga');
+        modalReasignar.addEventListener('show.bs.modal', function(event) {
+            const button = event.relatedTarget;
+            const id = button.getAttribute('data-id');
+            const docenteId = button.getAttribute('data-docente-id');
+            const docente = button.getAttribute('data-docente');
+            const materia = button.getAttribute('data-materia');
+            const grupo = button.getAttribute('data-grupo');
+
+            document.getElementById('formReasignarCarga').action = `/carga/reasignar/${id}`;
+            document.getElementById('reasignar_detalle').textContent = `${materia} - ${grupo}. Docente actual: ${docente}`;
+            $('#reasignar_id_docente').val(docenteId || '').trigger('change');
+        });
+
+        // Modal Eliminar - Cargar datos
+        const modalEliminar = document.getElementById('modalEliminarCarga');
+        modalEliminar.addEventListener('show.bs.modal', function(event) {
+            const button = event.relatedTarget;
+            const id = button.getAttribute('data-id');
+            const docente = button.getAttribute('data-docente');
+            const materia = button.getAttribute('data-materia');
+            const grupo = button.getAttribute('data-grupo');
+            
+            document.getElementById('delete_docente').innerHTML = `<i class="fas fa-chalkboard-teacher me-2"></i>Docente: ${docente}`;
+            document.getElementById('delete_materia').innerHTML = `<i class="fas fa-book me-2"></i>Materia: ${materia}`;
+            document.getElementById('delete_grupo').innerHTML = `<i class="fas fa-users me-2"></i>Grupo: ${grupo}`;
+            document.getElementById('btnEliminarCarga').href = `/carga/eliminar/${id}`;
+        });
+    </script>
+</body>
+</html>

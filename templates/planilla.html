@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="es" data-bs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planilla - {{ info.Nombre_Materia }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='estilos.css') }}" rel="stylesheet">
+    <style>
+        .sticky-col {
+            position: sticky;
+            left: 0;
+            background: #fff;
+            z-index: 10;
+            border-right: 2px solid #dee2e6;
+        }
+
+        .table-responsive {
+            max-height: 75vh;
+            overflow: auto;
+        }
+
+        /* 75% del ancho anterior aprox */
+        .nota-input {
+            width: 45% !important;
+            min-width: 34px !important;
+            padding: 3px 2px;
+            text-align: center;
+            font-size: 0.8rem;
+        }
+
+        .dim-select {
+            width: 82px !important;
+            min-width: 82px !important;
+            display: inline-block;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 0.75rem;
+            padding: 3px 4px;
+        }
+
+        .dim-select option[value="3"] { color: #fd7e14; font-weight: bold; }
+        .dim-select option[value="4"] { color: #0d6efd; font-weight: bold; }
+        .dim-select option[value="5"] { color: #198754; font-weight: bold; }
+
+        .indicador-textarea {
+            width: 100%;
+            min-width: 180px;
+            padding: 6px 8px;
+            font-size: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            resize: vertical;
+        }
+
+        .indicador-textarea:focus,
+        .observacion-textarea:focus,
+        .fallas-input:focus {
+            border-color: #667eea;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.25);
+        }
+
+        .observacion-textarea {
+            width: 100%;
+            min-width: 240px;
+            padding: 6px 8px;
+            font-size: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            resize: vertical;
+        }
+
+        .fallas-input {
+            width: 75px !important;
+            min-width: 60px !important;
+            text-align: center;
+            font-size: 0.85rem;
+        }
+
+        .nota-input::-webkit-inner-spin-button,
+        .nota-input::-webkit-outer-spin-button,
+        .fallas-input::-webkit-inner-spin-button,
+        .fallas-input::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .nota-input[type=number],
+        .fallas-input[type=number] {
+            -moz-appearance: textfield;
+            appearance: textfield;
+        }
+
+        .th-eval, .th-tarea, .th-final, .th-fallas, .th-observacion {
+            text-align: center !important;
+            vertical-align: middle !important;
+        }
+
+        .th-eval { background-color: #e7f1ff !important; color: #0d6efd; border-bottom: 2px solid #0d6efd; }
+        .th-tarea { background-color: #e8f7f1 !important; color: #198754; border-bottom: 2px solid #198754; }
+        .th-fallas { background-color: #fff3cd !important; color: #856404; border-bottom: 2px solid #ffc107; }
+        .th-observacion { background-color: #f8d7da !important; color: #842029; border-bottom: 2px solid #dc3545; }
+
+        tbody tr:hover .sticky-col { background-color: #f8f9fa !important; }
+
+        .btn-volver { transition: all 0.2s ease; }
+        .btn-volver:hover { transform: translateX(-3px); }
+
+        .alert-dim {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+        }
+
+        .toolbar-fixed {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: white;
+            padding: 10px 0;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #dee2e6;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-custom navbar-expand-lg mb-3">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{{ url_for('auth_bp.panel_docente') }}">
+                <i class="fas fa-edit me-2"></i>Planilla de Notas
+            </a>
+            <span class="navbar-text">
+                <i class="fas fa-book me-1"></i>{{ info.Nombre_Materia }} · {{ info.Nombre_Grupo }} · Período {{ periodo_activo }}
+            </span>
+        </div>
+    </nav>
+
+    <div class="container-fluid px-3">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% if is_dim %}
+        <div class="alert alert-dim mb-3">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <i class="fas fa-smile-wink me-2 fa-2x"></i>
+                    <strong>🎨 Educación Preescolar (DIM)</strong> - Sistema de calificación con emoticonos:
+                </div>
+                <div>
+                    <span class="badge bg-warning text-dark mx-1">😞 3 = Básico</span>
+                    <span class="badge bg-info mx-1">😐 4 = Alto</span>
+                    <span class="badge bg-success mx-1">😊 5 = Superior</span>
+                    <span class="badge bg-secondary mx-1">⚪ En blanco = No evaluado</span>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="toolbar-fixed">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <a href="{{ url_for('auth_bp.panel_docente') }}" class="btn btn-outline-secondary btn-volver me-2">
+                        <i class="fas fa-arrow-left me-2"></i>Volver
+                    </a>
+                    <a href="{{ url_for('planillas_bp.exportar_excel', id_carga=id_carga) }}"
+                       class="btn btn-success me-2">
+                        <i class="fas fa-file-excel me-2"></i>Exportar a Excel
+                    </a>
+                    <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalImportarExcel">
+                        <i class="fas fa-upload me-2"></i>Importar desde Excel
+                    </button>
+                </div>
+                <button type="submit" form="planillaForm" class="btn btn-primary btn-lg px-5">
+                    <i class="fas fa-save me-2"></i>Guardar Planilla
+                </button>
+            </div>
+        </div>
+
+        <form id="planillaForm" method="POST" action="{{ url_for('planillas_bp.planilla', id_carga=id_carga) }}" onsubmit="return validarNotasDIM()">
+            <div class="card shadow-sm mb-3">
+                <div class="card-header bg-light">
+                    <strong><i class="fas fa-list-check me-2"></i>Indicadores compartidos del grupo</strong>
+                    <div class="small text-muted mt-1">Los 10 indicadores aplican por igual a todos los estudiantes de esta planilla.</div>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        {% for i in range(1, 11) %}
+                        <div class="col-md-6 col-xl-4">
+                            <label class="form-label fw-semibold">Indicador {{ i }}</label>
+                            <textarea name="indicador{{ i }}" class="indicador-textarea" rows="2" placeholder="Indicador {{ i }} para todo el grupo...">{{ indicadores_grupo[i-1] or "" }}</textarea>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover mb-0 align-middle">
+                            <thead>
+                                <tr class="text-center">
+                                    <th class="sticky-col text-start" rowspan="2" style="min-width: 220px; width: 10%;">Estudiante</th>
+                                    <th colspan="10" class="th-eval">EVALUACIONES (95%)</th>
+                                    <th colspan="10" class="th-tarea">TAREAS (5%)</th>
+                                    <th class="th-fallas" rowspan="2" style="min-width: 80px;">FALLAS</th>
+                                    <th class="th-observacion" rowspan="2" style="min-width: 260px;">OBSERVACIÓN DEL PERÍODO</th>
+                                    <th class="th-final" rowspan="2" style="min-width: 115px;">NOTA FINAL</th>
+                                </tr>
+                                <tr>
+                                    {% for i in range(1, 11) %}
+                                        <th class="th-eval" style="min-width: 34px; width: 34px;">E{{ i }}</th>
+                                    {% endfor %}
+                                    {% for i in range(1, 11) %}
+                                        <th class="th-tarea" style="min-width: 34px; width: 34px;">T{{ i }}</th>
+                                    {% endfor %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for e in estudiantes %}
+                                <tr>
+                                    <td class="sticky-col fw-bold text-start">
+                                        {{ e.Apellidos }} {{ e.Nombres }}
+                                        <input type="hidden" name="id_estudiante" value="{{ e.ID_Estudiante }}">
+                                    </td>
+
+                                    {% for i in range(1, 11) %}
+                                    <td class="text-center">
+                                        {% if is_dim %}
+                                            <select name="eval_{{ e.ID_Estudiante }}_{{ i }}"
+                                                    class="form-select dim-select mx-auto dim-eval">
+                                                <option value="">-- 😶 --</option>
+                                                <option value="3" {% if e['eval_' + i|string] == 3 %}selected{% endif %}>😞 3</option>
+                                                <option value="4" {% if e['eval_' + i|string] == 4 %}selected{% endif %}>😐 4</option>
+                                                <option value="5" {% if e['eval_' + i|string] == 5 %}selected{% endif %}>😊 5</option>
+                                            </select>
+                                        {% else %}
+                                            <input type="number" step="0.1" min="0" max="5"
+                                                   name="eval_{{ e.ID_Estudiante }}_{{ i }}"
+                                                   class="form-control nota-input mx-auto"
+                                                   value="{{ e['eval_' + i|string] if e['eval_' + i|string] is not none else '' }}">
+                                        {% endif %}
+                                    </td>
+                                    {% endfor %}
+
+                                    {% for i in range(1, 11) %}
+                                    <td class="text-center">
+                                        {% if is_dim %}
+                                            <select name="tarea_{{ e.ID_Estudiante }}_{{ i }}"
+                                                    class="form-select dim-select mx-auto dim-tarea">
+                                                <option value="">-- 😶 --</option>
+                                                <option value="3" {% if e['tarea_' + i|string] == 3 %}selected{% endif %}>😞 3</option>
+                                                <option value="4" {% if e['tarea_' + i|string] == 4 %}selected{% endif %}>😐 4</option>
+                                                <option value="5" {% if e['tarea_' + i|string] == 5 %}selected{% endif %}>😊 5</option>
+                                            </select>
+                                        {% else %}
+                                            <input type="number" step="0.1" min="0" max="5"
+                                                   name="tarea_{{ e.ID_Estudiante }}_{{ i }}"
+                                                   class="form-control nota-input mx-auto"
+                                                   value="{{ e['tarea_' + i|string] if e['tarea_' + i|string] is not none else '' }}">
+                                        {% endif %}
+                                    </td>
+                                    {% endfor %}
+
+                                    <td class="text-center">
+                                        <input type="number"
+                                               min="0"
+                                               name="fallas_{{ e.ID_Estudiante }}"
+                                               class="form-control fallas-input mx-auto"
+                                               value="{{ e.fallas_periodo if e.fallas_periodo is defined else 0 }}">
+                                    </td>
+
+                                    <td class="text-center">
+                                        <textarea name="observacion_{{ e.ID_Estudiante }}"
+                                                  class="observacion-textarea"
+                                                  rows="3"
+                                                  placeholder="Escriba la observación del período para este estudiante...">{{ e.observacion_periodo if e.observacion_periodo is defined else '' }}</textarea>
+                                    </td>
+
+                                    <td class="text-center fw-bold">
+                                        {% if e.C1 is not none %}
+                                            {% if is_dim %}
+                                                {% if e.C1 == 3 %}
+                                                    <span class="badge bg-warning text-dark fs-6">😞 {{ e.C1 }}</span>
+                                                {% elif e.C1 == 4 %}
+                                                    <span class="badge bg-info fs-6">😐 {{ e.C1 }}</span>
+                                                {% elif e.C1 == 5 %}
+                                                    <span class="badge bg-success fs-6">😊 {{ e.C1 }}</span>
+                                                {% else %}
+                                                    <span class="badge bg-secondary fs-6">{{ e.C1 }}</span>
+                                                {% endif %}
+                                            {% else %}
+                                                <span class="badge bg-{{ 'success' if e.C1 >= 3.0 else 'danger' }} fs-6">{{ e.C1 }}</span>
+                                            {% endif %}
+                                        {% else %}
+                                            <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="25" class="text-center py-4 text-muted">
+                                        No hay estudiantes en este grupo.
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer bg-white">
+                    <div class="alert alert-info mb-0 small">
+                        <i class="fas fa-info-circle me-1"></i>
+                        <strong>Nota:</strong>
+                        {% if is_dim %}
+                            📝 Las calificaciones para Preescolar usan emoticonos:
+                            <strong>😞 = Básico (3.0)</strong>,
+                            <strong>😐 = Alto (4.0)</strong>,
+                            <strong>😊 = Superior (5.0)</strong>.
+                        {% else %}
+                            El sistema calcula el promedio automáticamente. Si deja una casilla vacía, no se cuenta en el divisor.
+                        {% endif %}
+                        También puede registrar las <strong>fallas</strong> y la <strong>observación del período</strong> para cada estudiante.
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="modal fade" id="modalImportarExcel" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-warning">
+                    <h5 class="modal-title text-dark">
+                        <i class="fas fa-file-excel me-2"></i>Importar Notas desde Excel
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="POST" action="{{ url_for('planillas_bp.importar_excel', id_carga=id_carga) }}"
+                      enctype="multipart/form-data">
+                    <div class="modal-body">
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Instrucciones:</strong>
+                            <ol class="mb-0 mt-2">
+                                <li>Exporte la planilla usando el botón <strong>"Exportar a Excel"</strong></li>
+                                <li>Complete las notas en la hoja principal</li>
+                                <li>Complete también <strong>Fallas</strong> y <strong>Observacion</strong></li>
+                                <li>Edite los 10 indicadores una sola vez para todo el grupo</li>
+                                <li>Guarde el archivo sin cambiar los nombres de las columnas</li>
+                                <li>Seleccione el archivo y haga clic en <strong>"Importar"</strong></li>
+                            </ol>
+                        </div>
+
+                        {% if is_dim %}
+                        <div class="alert alert-warning">
+                            <i class="fas fa-smile me-2"></i>
+                            <strong>Materia DIM (Preescolar):</strong>
+                            Solo se permiten notas <strong>3, 4 o 5</strong>
+                        </div>
+                        {% endif %}
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Seleccionar archivo Excel</label>
+                            <input type="file" name="archivo_excel" class="form-control"
+                                   accept=".xlsx,.xls" required>
+                            <small class="text-muted">Solo archivos .xlsx o .xls generados por el sistema</small>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-warning">Importar Notas</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function validarNotasDIM() {
+            {% if is_dim %}
+                var selects = document.querySelectorAll('.dim-eval, .dim-tarea');
+                for (var select of selects) {
+                    var valor = select.value;
+                    if (valor !== '' && !['3', '4', '5', ''].includes(valor)) {
+                        alert('⚠️ Solo se permiten calificaciones 3, 4 o 5 para Preescolar.\\n\\n😞 3 = Básico\\n😐 4 = Alto\\n😊 5 = Superior');
+                        select.focus();
+                        return false;
+                    }
+                }
+            {% else %}
+                var inputs = document.querySelectorAll('.nota-input');
+                for (var input of inputs) {
+                    if (input.value !== '') {
+                        var valor = parseFloat(input.value);
+                        if (isNaN(valor) || valor < 0 || valor > 5) {
+                            alert('Las notas deben ser números entre 0 y 5');
+                            input.focus();
+                            return false;
+                        }
+                    }
+                }
+            {% endif %}
+
+            var fallasInputs = document.querySelectorAll('.fallas-input');
+            for (var finput of fallasInputs) {
+                if (finput.value !== '') {
+                    var fvalor = parseInt(finput.value, 10);
+                    if (isNaN(fvalor) || fvalor < 0) {
+                        alert('Las fallas deben ser un número entero igual o mayor a 0');
+                        finput.focus();
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        document.querySelector('#modalImportarExcel form')?.addEventListener('submit', function(e) {
+            var archivo = this.querySelector('input[type="file"]').files[0];
+            if (archivo && !archivo.name.match(/\.(xlsx|xls)$/i)) {
+                e.preventDefault();
+                alert('Por favor seleccione un archivo Excel válido (.xlsx o .xls)');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Lista de Estudiantes | SIEE</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container py-5">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h3 class="mb-0">Gestión de Estudiantes</h3>
+                <form action="{{ url_for('boletin_bp.informe_final_lote_admin_seleccion') }}" method="POST" class="d-flex gap-2">
+                    <select name="id_grupo" class="form-select form-select-sm" required>
+                        <option value="">Lote Final por Grupo...</option>
+                        {% for g in grupos %}
+                        <option value="{{ g.ID_Grupo }}">{{ g.Nombre_Grupo }}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" class="btn btn-sm btn-dark">🖨️ Generar</button>
+                </form>
+            </div>
+            <div class="card-body">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Estudiante</th>
+                            <th>Grupo</th>
+                            <th class="text-center">Reportes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for e in estudiantes %}
+                        <tr>
+                            <td>{{ e.Apellidos }} {{ e.Nombres }}</td>
+                            <td>{{ e.Nombre_Grupo }}</td>
+                            <td class="text-center">
+                                <a href="{{ url_for('boletin_bp.boletin', id_estudiante=e.ID_Estudiante) }}" class="btn btn-sm btn-info text-white">🎨 Boletín</a>
+                                <a href="{{ url_for('boletin_bp.informe_final', id_estudiante=e.ID_Estudiante) }}" class="btn btn-sm btn-dark">🎓 Final</a>
+                                <a href="{{ url_for('boletin_bp.observador', id_estudiante=e.ID_Estudiante) }}" class="btn btn-sm btn-outline-secondary">📝</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

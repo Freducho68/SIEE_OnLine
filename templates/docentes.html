@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Docentes</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #f0f2f5;
+        }
+        .btn-docente {
+            transition: all 0.3s ease;
+        }
+        .btn-docente:hover {
+            transform: translateY(-2px);
+        }
+        .table-docentes th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-custom {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+        }
+        .btn-custom:hover {
+            transform: translateY(-2px);
+            color: white;
+        }
+        .avatar-docente {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        .badge-activo {
+            background: #d4edda;
+            color: #155724;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+        }
+        .badge-inactivo {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-dark bg-dark mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('admin_bp.panel') }}">
+                <i class="fas fa-arrow-left me-2"></i>Volver al Panel
+            </a>
+            <span class="navbar-text">
+                <i class="fas fa-chalkboard-teacher me-2"></i>Gestión de Docentes
+            </span>
+        </div>
+    </nav>
+
+    <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-triangle' }} me-2"></i>
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="card shadow">
+            <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-list me-2"></i>Lista de Docentes</h5>
+                <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#modalCrearDocente">
+                    <i class="fas fa-plus me-1"></i>Nuevo Docente
+                </button>
+            </div>
+            <div class="card-body">
+                {% if docentes %}
+                <div class="table-responsive">
+                    <table class="table table-hover table-docentes">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Avatar</th>
+                                <th>Nombres</th>
+                                <th>Apellidos</th>
+                                <th>Usuario</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for docente in docentes %}
+                            <tr>
+                                <td>{{ docente.ID_Docente }}</td>
+                                <td class="text-center">
+                                    <div class="avatar-docente">
+                                        {{ (docente.Nombres[0] if docente.Nombres else '?') }}{{ (docente.Apellidos[0] if docente.Apellidos else '?') }}
+                                    </div>
+                                </td>
+                                <td><strong>{{ docente.Nombres }}</strong></td>
+                                <td>{{ docente.Apellidos }}</td>
+                                <td>
+                                    {% if docente.Usuario %}
+                                        <span class="badge bg-success">{{ docente.Usuario }}</span>
+                                    {% else %}
+                                        <span class="badge bg-warning text-dark">Sin usuario</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if docente.Usuario %}
+                                        <span class="badge-activo"><i class="fas fa-check-circle me-1"></i>Activo</span>
+                                    {% else %}
+                                        <span class="badge-inactivo"><i class="fas fa-clock me-1"></i>Pendiente</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <button type="button" class="btn btn-sm btn-warning btn-docente"
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#modalEditarDocente"
+                                                data-id="{{ docente.ID_Docente }}"
+                                                data-nombres="{{ docente.Nombres }}"
+                                                data-apellidos="{{ docente.Apellidos }}"
+                                                title="Editar">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-danger btn-docente"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#modalEliminarDocente"
+                                                data-id="{{ docente.ID_Docente }}"
+                                                data-nombres="{{ docente.Nombres }}"
+                                                data-apellidos="{{ docente.Apellidos }}"
+                                                title="Eliminar">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-info text-center">
+                    <i class="fas fa-info-circle me-2"></i>
+                    No hay docentes registrados.
+                    <button type="button" class="btn btn-sm btn-primary ms-3" data-bs-toggle="modal" data-bs-target="#modalCrearDocente">
+                        <i class="fas fa-plus me-1"></i>Crear el primer docente
+                    </button>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Estadísticas -->
+        <div class="row mt-4">
+            <div class="col-md-4">
+                <div class="card text-center border-primary">
+                    <div class="card-body">
+                        <i class="fas fa-chalkboard-teacher fa-2x text-primary"></i>
+                        <h3 class="mt-2 mb-0">{{ docentes|length }}</h3>
+                        <small class="text-muted">Total Docentes</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center border-success">
+                    <div class="card-body">
+                        <i class="fas fa-check-circle fa-2x text-success"></i>
+                        <h3 class="mt-2 mb-0">
+                            {% set activos = docentes|selectattr("Usuario")|list|length %}
+                            {{ activos }}
+                        </h3>
+                        <small class="text-muted">Con Usuario Activo</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center border-warning">
+                    <div class="card-body">
+                        <i class="fas fa-clock fa-2x text-warning"></i>
+                        <h3 class="mt-2 mb-0">{{ docentes|length - activos if docentes else 0 }}</h3>
+                        <small class="text-muted">Pendientes</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Crear Docente -->
+    <div class="modal fade" id="modalCrearDocente" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-plus-circle me-2"></i>Crear Nuevo Docente</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="POST" action="{{ url_for('docentes_bp.crear_docente') }}">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Nombres <span class="text-danger">*</span></label>
+                            <input type="text" name="nombres" class="form-control" required placeholder="Ej: María José">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Apellidos <span class="text-danger">*</span></label>
+                            <input type="text" name="apellidos" class="form-control" required placeholder="Ej: González Pérez">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" name="email" class="form-control" placeholder="ejemplo@colegio.edu">
+                        </div>
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <small>Se creará automáticamente un usuario para el docente con contraseña: <strong>123456</strong></small>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-custom">Crear Docente</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Editar Docente -->
+    <div class="modal fade" id="modalEditarDocente" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-edit me-2"></i>Editar Docente</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="POST" id="formEditarDocente">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Nombres <span class="text-danger">*</span></label>
+                            <input type="text" name="nombres" id="edit_nombres" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Apellidos <span class="text-danger">*</span></label>
+                            <input type="text" name="apellidos" id="edit_apellidos" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-custom">Guardar Cambios</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Eliminar Docente -->
+    <div class="modal fade" id="modalEliminarDocente" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title"><i class="fas fa-exclamation-triangle me-2"></i>Eliminar Docente</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>¿Estás seguro de que deseas eliminar al docente <strong id="delete_nombre_docente"></strong>?</p>
+                    <p class="text-danger"><small><i class="fas fa-info-circle me-1"></i>Esta acción también eliminará su usuario y todas sus cargas académicas.</small></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <a href="#" id="btnEliminarDocente" class="btn btn-danger">Eliminar</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Modal Editar - Cargar datos
+        const modalEditar = document.getElementById('modalEditarDocente');
+        modalEditar.addEventListener('show.bs.modal', function(event) {
+            const button = event.relatedTarget;
+            const id = button.getAttribute('data-id');
+            const nombres = button.getAttribute('data-nombres');
+            const apellidos = button.getAttribute('data-apellidos');
+            
+            const form = document.getElementById('formEditarDocente');
+            form.action = "{{ url_for('docentes_bp.editar_docente', id_docente=0) }}".replace('0', id);
+            
+            document.getElementById('edit_nombres').value = nombres;
+            document.getElementById('edit_apellidos').value = apellidos;
+        });
+        
+        // Modal Eliminar - Cargar datos
+        const modalEliminar = document.getElementById('modalEliminarDocente');
+        modalEliminar.addEventListener('show.bs.modal', function(event) {
+            const button = event.relatedTarget;
+            const id = button.getAttribute('data-id');
+            const nombres = button.getAttribute('data-nombres');
+            const apellidos = button.getAttribute('data-apellidos');
+            
+            document.getElementById('delete_nombre_docente').textContent = `${nombres} ${apellidos}`;
+            document.getElementById('btnEliminarDocente').href = "{{ url_for('docentes_bp.eliminar_docente', id_docente=0) }}".replace('0', id);
+        });
+    </script>
+</body>
+</html>

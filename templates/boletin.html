@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Boletín - {{ estudiante.Nombres }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --green-border: #4caf50;
+            --text-main: #111;
+            --text-muted: #555;
+            --green-light: #e8f5e9;
+        }
+        @page { size: letter; margin: 10mm; }
+        body { 
+            font-family: 'Nunito', sans-serif; 
+            font-size: 11px; 
+            margin: 0; 
+            background: #fff; 
+            color: var(--text-main);
+        }
+        
+        .boletin-container { 
+            max-width: 190mm; 
+            margin: 0 auto; 
+            background: #fff; 
+            padding: 15px; 
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+        }
+
+        
+        .header { 
+            display: flex; 
+            align-items: center;
+            background: linear-gradient(90deg, #fdfbfb 0%, #f4f8f4 100%);
+            padding: 15px; 
+            border-radius: 10px; 
+            margin-bottom: 20px; 
+        }
+        .header .logo { width: 130px; margin-right: 20px; }
+        .header .logo img { width: 100%; height: auto; display: block; filter: drop-shadow(1px 1px 3px rgba(0,0,0,0.1)); }
+        .header-text { flex-grow: 1; text-align: center; }
+        .inst-nombre { font-size: 1.6em; font-weight: 800; margin: 0; text-transform: uppercase; letter-spacing: 0.5px; }
+        .inst-lema { font-size: 1.1em; font-weight: 700; margin: 4px 0; }
+        .inst-legal { font-size: 0.85em; color: var(--text-muted); margin: 0; }
+
+        
+        .info-estudiante { 
+            display: grid; 
+            grid-template-columns: 2fr 1fr 1fr 1fr; 
+            gap: 10px; 
+            margin-bottom: 15px; 
+        }
+        .chip { 
+            border: 1.5px solid var(--green-border); 
+            padding: 8px 12px; 
+            border-radius: 8px; 
+            background: #fff;
+        }
+        .label { font-size: 0.75em; font-weight: 800; color: var(--green-border); display: block; margin-bottom: 2px; }
+        .value { font-size: 1em; font-weight: 800; text-transform: uppercase; }
+
+        
+        .leyenda-caritas {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 40px;
+            padding: 10px;
+            margin-bottom: 15px;
+            border-top: 1px solid #e0e0e0;
+            border-bottom: 1px solid #e0e0e0;
+            font-weight: 700;
+            font-size: 12px;
+        }
+        .leyenda-item { display: flex; align-items: center; gap: 8px; }
+
+        
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-bottom: 15px; 
+        }
+        
+        .dim-header-row td {
+            padding-top: 10px;
+            padding-bottom: 8px;
+            background-color: #eef7eb; 
+            border-bottom: 2px solid #c8e6c9;
+        }
+        
+        .dim-header-row td:first-child {
+            padding-left: 15px;
+            border-top-left-radius: 6px;
+            border-bottom-left-radius: 6px;
+        }
+
+        .dim-header-row td:last-child {
+            border-top-right-radius: 6px;
+            border-bottom-right-radius: 6px;
+        }
+
+        .dim-title-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .dim-icon-wrapper {
+            font-size: 35px;
+            min-width: 45px;
+            text-align: center;
+        }
+        .dim-text-wrapper {
+            display: flex;
+            flex-direction: column;
+        }
+        .dim-name {
+            font-size: 13px;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+        .dim-evidencias-label {
+            font-size: 10px;
+            font-weight: 800;
+            color: #2e7d32;
+        }
+
+        .col-head {
+            font-weight: 800;
+            color: #2e7d32;
+            text-align: center;
+            width: 50px;
+            font-size: 12px;
+            vertical-align: middle;
+        }
+
+        .fila-evidencia td {
+            padding: 8px 5px 8px 75px; 
+            font-size: 10.5px;
+            border-bottom: 1px solid #f0f0f0;
+            color: #333;
+        }
+        .fila-evidencia td.col-check {
+            text-align: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+            border-left: 1px solid #f0f0f0;
+        }
+
+        
+        .observaciones-box {
+            margin-top: 20px;
+            border: 2px dashed #ff8a80;
+            padding: 12px;
+            border-radius: 10px;
+            background: #fff;
+        }
+        .obs-title {
+            color: #d32f2f;
+            font-weight: 800;
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+
+        .firmas {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 45px;
+            text-align: center;
+        }
+        .firma-box { width: 40%; }
+        
+        
+        .firma-digital-texto {
+            font-family: 'Great Vibes', cursive;
+            font-size: 24px;
+            font-weight: bold;
+            color: #16315c;
+            transform: rotate(-1.5deg);
+            display: block;
+            user-select: none;
+            
+            
+            height: auto;
+            line-height: 1; 
+            margin: 0 auto 0px auto; 
+            
+            
+            margin-bottom: -2px; 
+        }
+        
+        .firma-linea { border-top: 1px solid #333; width: 80%; margin: 0 auto; }
+        .firma-cargo { font-size: 10px; color: var(--text-muted); font-weight: 700; }
+
+        @media print { 
+            .no-print { display: none; } 
+            .boletin-container { border: none; padding: 0; }
+            .dim-header-row td { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        }
+    </style>
+</head>
+<body>
+
+    {% macro svg_face(tipo) %}
+        {% if tipo == 'L' %}
+            <svg width="22" height="22" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="#c8e6c9" stroke="#4caf50" stroke-width="2"/><circle cx="8" cy="9" r="1.5" fill="#000"/><circle cx="16" cy="9" r="1.5" fill="#000"/><path d="M 7 14 Q 12 19 17 14" stroke="#000" stroke-width="1.5" fill="transparent" stroke-linecap="round"/></svg>
+        {% elif tipo == 'EP' %}
+            <svg width="22" height="22" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="#fff9c4" stroke="#fbc02d" stroke-width="2"/><circle cx="8" cy="9" r="1.5" fill="#000"/><circle cx="16" cy="9" r="1.5" fill="#000"/><path d="M 8 15 L 16 15" stroke="#000" stroke-width="1.5" fill="transparent" stroke-linecap="round"/></svg>
+        {% elif tipo == 'NR' %}
+            <svg width="22" height="22" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="#ffcdd2" stroke="#f44336" stroke-width="2"/><circle cx="8" cy="10" r="1.5" fill="#000"/><circle cx="16" cy="10" r="1.5" fill="#000"/><path d="M 7 16 Q 12 12 17 16" stroke="#000" stroke-width="1.5" fill="transparent" stroke-linecap="round"/></svg>
+        {% endif %}
+    {% endmacro %}
+
+    {% macro marca(nota, tipo) %}
+        {%- if (tipo == 'L' and nota and nota >= 4.5) or (tipo == 'EP' and nota and 3.5 <= nota < 4.5) or (tipo == 'NR' and nota and nota < 3.5) -%}
+            {{ svg_face(tipo) }}
+        {%- endif -%}
+    {% endmacro %}
+
+    <div class="no-print" style="text-align:right; padding:10px;">
+        <button onclick="window.print()" style="background: #4caf50; border: none; color: white; padding: 8px 20px; border-radius: 8px; font-weight: bold; cursor: pointer;">🖨️ Imprimir</button>
+    </div>
+
+    <div class="boletin-container">
+        
+        <div class="header">
+            <div class="logo">
+                <img src="{{ url_for('static', filename='img/logo_colegio.png') }}" alt="Logo Chiquilladas">
+            </div>
+            <div class="header-text">
+                <p class="inst-nombre">CENTRO EDUCATIVO CHIQUILLADAS</p>
+                <p class="inst-lema">Formación Integral y Recreativa</p>
+                <p class="inst-legal">Res. 002336 del 26 de febrero de 2024<br>DANE 354498002494</p>
+            </div>
+        </div>
+
+        <div class="info-estudiante">
+            <div class="chip"><span class="label">ESTUDIANTE:</span> <span class="value">{{ estudiante.Nombres | upper }} {{ estudiante.Apellidos | upper }}</span></div>
+            <div class="chip"><span class="label">GRADO:</span> <span class="value">{{ estudiante.Nombre_Grupo }}</span></div>
+            <div class="chip"><span class="label">PERIODO:</span> <span class="value">{{ periodo_actual }}°</span></div>
+            <div class="chip"><span class="label">FALLAS:</span> <span class="value">{{ fallas_periodo or 0 }}</span></div>
+        </div>
+
+        <div class="leyenda-caritas">
+            <div class="leyenda-item">{{ svg_face('L') }} L: LOGRADO</div>
+            <div class="leyenda-item" style="color:#e0e0e0;">|</div>
+            <div class="leyenda-item">{{ svg_face('EP') }} EP: EN PROCESO</div>
+            <div class="leyenda-item" style="color:#e0e0e0;">|</div>
+            <div class="leyenda-item">{{ svg_face('NR') }} NR: NECESITA REFUERZO</div>
+        </div>
+
+        <table>
+            <tbody>
+                {% set area_actual = namespace(nombre='') %}
+                {% for m in materias %}
+
+                    {% set area_upper = m.Nombre_Area | upper %}
+                    {% set dim_icon = '⭐' %}
+                    
+                    {% if 'COG' in area_upper %}
+                        {% set dim_icon = '🧠' %}
+                    {% elif 'COM' in area_upper %}
+                        {% set dim_icon = '🗣️' %}
+                    {% elif 'CORP' in area_upper or 'FIS' in area_upper %}
+                        {% set dim_icon = '🤸' %}
+                    {% elif 'ESP' in area_upper %}
+                        {% set dim_icon = '🙏' %}
+                    {% elif 'EST' in area_upper %}
+                        {% set dim_icon = '🎨' %}
+                    {% elif 'ETIC' in area_upper or 'ÉTIC' in area_upper %}
+                        {% set dim_icon = '❤️' %}
+                    {% elif 'SOC' in area_upper %}
+                        {% set dim_icon = '🫂' %}
+                    {% elif 'COMP' in area_upper or 'CONV' in area_upper %}
+                        {% set dim_icon = '🏫' %}
+                    {% endif %}
+
+                    {% if m.Nombre_Area != area_actual.nombre %}
+                        {% set area_actual.nombre = m.Nombre_Area %}
+                        <tr class="dim-header-row">
+                            <td>
+                                <div class="dim-title-container">
+                                    <div class="dim-icon-wrapper">{{ dim_icon }}</div>
+                                    <div class="dim-text-wrapper">
+                                        <span class="dim-name">
+                                            {% set clean_dim = m.Nombre_Area | replace('DIM', '') | replace('.', '') | trim %}
+                                            {% if clean_dim == 'COMPORTAMIENTO' or clean_dim == 'CONVIVENCIA' %}
+                                                {{ clean_dim }}
+                                            {% else %}
+                                                DIMENSIÓN {{ clean_dim }}
+                                            {% endif %}
+                                        </span>
+                                        <span class="dim-evidencias-label">EVIDENCIAS DE APRENDIZAJE</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="col-head">L</td>
+                            <td class="col-head">EP</td>
+                            <td class="col-head">NR</td>
+                        </tr>
+                    {% endif %}
+
+                    {% set nota = m.nota_p1 if periodo_actual == 1 else m.nota_p2 if periodo_actual == 2 else m.nota_p3 if periodo_actual == 3 else m.nota_p4 %}
+
+                    {% if m.indicadores %}
+                        {% for ind in m.indicadores %}
+                        <tr class="fila-evidencia">
+                            <td>{{ ind | replace('DIM', '') | replace('.', '') | trim }}</td>
+                            <td class="col-check">{{ marca(nota, 'L') }}</td>
+                            <td class="col-check">{{ marca(nota, 'EP') }}</td>
+                            <td class="col-check">{{ marca(nota, 'NR') }}</td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr class="fila-evidencia">
+                            <td>&nbsp;</td>
+                            <td class="col-check">{{ marca(nota, 'L') }}</td>
+                            <td class="col-check">{{ marca(nota, 'EP') }}</td>
+                            <td class="col-check">{{ marca(nota, 'NR') }}</td>
+                        </tr>
+                    {% endif %}
+
+                {% endfor %}
+            </tbody>
+        </table>
+        
+        <div class="observaciones-box">
+            <div class="obs-title">✏️ OBSERVACIONES GENERALES:</div>
+            <div style="font-weight: 600; font-size: 11.5px;">{{ observacion_periodo or '' }}</div>
+        </div>
+
+        <div class="firmas">
+            <div class="firma-box">
+                <span class="firma-digital-texto">{{ (titular_nombre ) | title }}</span>
+                <div class="firma-linea"></div>
+               
+                <div class="firma-cargo">Docente Titular</div>
+            </div>
+            <div class="firma-box">
+                <span class="firma-digital-texto">{{ (directora_nombre ) | title }}</span>
+                <div class="firma-linea"></div>
+                
+                <div class="firma-cargo">Directora</div>
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>

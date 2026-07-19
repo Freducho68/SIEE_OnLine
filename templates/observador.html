@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Observador del Alumno</title>
+    <style>
+        @page {
+            size: letter;
+            margin: 16mm;
+        }
+
+        body {
+            font-family: "Segoe UI", Arial, sans-serif;
+            margin: 0;
+            background: #eef3f8;
+            color: #1f2937;
+        }
+
+        .page {
+            max-width: 980px;
+            margin: 24px auto;
+            background: #ffffff;
+            border-radius: 18px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 22px;
+            background: #0f4c81;
+            color: white;
+        }
+
+        .topbar .acciones a {
+            display: inline-block;
+            text-decoration: none;
+            color: white;
+            background: rgba(255, 255, 255, 0.14);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            padding: 9px 14px;
+            border-radius: 10px;
+            margin-left: 8px;
+            font-size: 0.92rem;
+        }
+
+        .header {
+            padding: 28px 34px 20px;
+            background: linear-gradient(135deg, #f8fbff 0%, #edf4fb 100%);
+            border-bottom: 1px solid #dbe4ee;
+        }
+
+        .header-top {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .logo-box {
+            width: 88px;
+            height: 88px;
+            border-radius: 16px;
+            background: white;
+            border: 1px solid #d9e4ef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(15, 76, 129, 0.05);
+        }
+
+        .logo-box img {
+            max-width: 72px;
+            max-height: 72px;
+            object-fit: contain;
+        }
+
+        .header-texto h1 {
+            margin: 0;
+            font-size: 1.55rem;
+            color: #0f4c81;
+            letter-spacing: 0.3px;
+        }
+
+        .header-texto .subtitulo {
+            margin-top: 6px;
+            color: #5b6b7f;
+            font-size: 0.95rem;
+        }
+
+        .datos {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px 24px;
+            margin-top: 20px;
+        }
+
+        .dato {
+            background: white;
+            border: 1px solid #e4ebf2;
+            border-radius: 12px;
+            padding: 12px 14px;
+        }
+
+        .dato .label {
+            display: block;
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            color: #6b7280;
+            margin-bottom: 4px;
+            font-weight: 700;
+        }
+
+        .dato .valor {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .contenido {
+            padding: 26px 34px 30px;
+        }
+
+        .grid-periodos {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 18px;
+        }
+
+        .card-periodo {
+            border: 1px solid #dfe8f1;
+            border-radius: 16px;
+            overflow: hidden;
+            background: #ffffff;
+            box-shadow: 0 4px 12px rgba(15, 76, 129, 0.05);
+        }
+
+        .card-periodo .titulo {
+            background: #0f4c81;
+            color: white;
+            padding: 12px 16px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            letter-spacing: 0.3px;
+        }
+
+        .card-periodo .cuerpo {
+            padding: 16px;
+        }
+
+        .obs-texto {
+            min-height: 120px;
+            background: #f8fbfe;
+            border: 1px solid #e5edf5;
+            border-radius: 12px;
+            padding: 12px;
+            line-height: 1.5;
+            font-size: 0.94rem;
+            color: #263445;
+            white-space: pre-wrap;
+        }
+
+        .fallas-box {
+            margin-top: 12px;
+            display: inline-block;
+            background: #fff7e8;
+            color: #8a5a00;
+            border: 1px solid #f0d18a;
+            border-radius: 999px;
+            padding: 7px 12px;
+            font-size: 0.88rem;
+            font-weight: 700;
+        }
+
+        .seccion {
+            margin-top: 24px;
+            border: 1px solid #dfe8f1;
+            border-radius: 16px;
+            overflow: hidden;
+            background: white;
+            box-shadow: 0 4px 12px rgba(15, 76, 129, 0.05);
+        }
+
+        .seccion .seccion-titulo {
+            background: #f3f7fb;
+            color: #0f4c81;
+            padding: 12px 16px;
+            font-weight: 800;
+            border-bottom: 1px solid #e1e9f2;
+            letter-spacing: 0.2px;
+        }
+
+        .seccion .seccion-cuerpo {
+            padding: 16px;
+        }
+
+        .texto-libre {
+            min-height: 90px;
+            background: #fafcff;
+            border: 1px solid #e5edf5;
+            border-radius: 12px;
+            padding: 12px;
+            line-height: 1.55;
+            font-size: 0.95rem;
+            white-space: pre-wrap;
+        }
+
+        .resultado-final {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .resultado-item {
+            background: #f8fbfe;
+            border: 1px solid #e5edf5;
+            border-radius: 12px;
+            padding: 14px;
+        }
+
+        .resultado-item .label {
+            display: block;
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            color: #6b7280;
+            margin-bottom: 5px;
+            font-weight: 700;
+        }
+
+        .resultado-item .valor {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #1f2937;
+        }
+
+        .firmas {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-top: 34px;
+            align-items: end;
+        }
+
+        .firma {
+            text-align: center;
+        }
+
+        .firma-img {
+            max-height: 88px;
+            max-width: 220px;
+            object-fit: contain;
+            display: block;
+            margin: 0 auto 10px;
+        }
+
+        .linea {
+            border-top: 1.5px solid #1f2937;
+            width: 85%;
+            margin: 0 auto 8px;
+        }
+
+        .firma .nombre {
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+
+        .firma .cargo {
+            color: #5b6b7f;
+            font-size: 0.86rem;
+            margin-top: 3px;
+        }
+
+        .footer {
+            text-align: center;
+            color: #6b7280;
+            font-size: 0.8rem;
+            padding: 18px 24px 24px;
+        }
+
+        @media print {
+            body {
+                background: white;
+            }
+
+            .page {
+                margin: 0;
+                max-width: 100%;
+                border-radius: 0;
+                box-shadow: none;
+            }
+
+            .topbar {
+                display: none !important;
+            }
+
+            .card-periodo,
+            .seccion {
+                box-shadow: none;
+            }
+        }
+
+        @media (max-width: 800px) {
+            .datos,
+            .grid-periodos,
+            .resultado-final,
+            .firmas {
+                grid-template-columns: 1fr;
+            }
+
+            .header-top {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .header,
+            .contenido {
+                padding-left: 18px;
+                padding-right: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <div class="topbar">
+            <div><strong>Observador del Alumno</strong></div>
+            <div class="acciones">
+                <a href="{{ url_for('boletin_bp.editar_observador', id_estudiante=estudiante['ID_Estudiante']) }}">
+                    Editar observador anual
+                </a>
+                <a href="{{ url_for('boletin_bp.boletin', id_estudiante=estudiante['ID_Estudiante']) }}">
+                    Volver al boletín
+                </a>
+            </div>
+        </div>
+
+        <div class="header">
+            <div class="header-top">
+                <div class="logo-box">
+                    <img src="{{ url_for('static', filename='img/logo_colegio.png') }}"
+                         alt="Logo del colegio"
+                         onerror="this.style.display='none';">
+                </div>
+
+                <div class="header-texto">
+                    <h1>CENTRO EDUCATIVO “CHIQUILLADAS”</h1>
+                    <div class="subtitulo">Observador del alumno · Año lectivo {{ current_year }}</div>
+                </div>
+            </div>
+
+            <div class="datos">
+                <div class="dato">
+                    <span class="label">Estudiante</span>
+                    <div class="valor">{{ estudiante.Nombres }} {{ estudiante.Apellidos }}</div>
+                </div>
+
+                <div class="dato">
+                    <span class="label">Grado</span>
+                    <div class="valor">{{ estudiante.Nombre_Grupo }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="contenido">
+            <div class="grid-periodos">
+                {% for p in [1, 2, 3, 4] %}
+                {% set fila = periodos|selectattr('Periodo', 'equalto', p)|list|first %}
+                <div class="card-periodo">
+                    <div class="titulo">
+                        {{ ['PRIMER', 'SEGUNDO', 'TERCER', 'CUARTO'][p-1] }} PERÍODO
+                    </div>
+                    <div class="cuerpo">
+                        <div class="obs-texto">{{ fila.Observacion if fila and fila.Observacion else 'Sin observación registrada.' }}</div>
+                        <div class="fallas-box">Fallas: {{ fila.Fallas if fila else 0 }}</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="seccion">
+                <div class="seccion-titulo">Observaciones generales</div>
+                <div class="seccion-cuerpo">
+                    <div class="texto-libre">{{ anual.Observaciones_Generales if anual and anual.Observaciones_Generales else 'Sin observaciones generales registradas.' }}</div>
+                </div>
+            </div>
+
+            <div class="seccion">
+                <div class="seccion-titulo">Resultado final</div>
+                <div class="seccion-cuerpo">
+                    <div class="resultado-final">
+                        <div class="resultado-item">
+                            <span class="label">Concepto final</span>
+                            <div class="valor">{{ anual.Concepto_Final if anual and anual.Concepto_Final else 'Pendiente' }}</div>
+                        </div>
+                        <div class="resultado-item">
+                            <span class="label">Promovido a</span>
+                            <div class="valor">{{ anual.Promovido_A if anual and anual.Promovido_A else 'Pendiente' }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="firmas">
+                <div class="firma">
+                    {% if firma_directora %}
+                        <img src="{{ url_for('static', filename=firma_directora) }}" alt="Firma directora" class="firma-img">
+                    {% endif %}
+                    <div class="linea"></div>
+                    <div class="nombre">{{ directora_nombre }}</div>
+                    <div class="cargo">Directora</div>
+                </div>
+
+                <div class="firma">
+                    {% if firma_titular %}
+                        <img src="{{ url_for('static', filename=firma_titular) }}" alt="Firma titular" class="firma-img">
+                    {% endif %}
+                    <div class="linea"></div>
+                    <div class="nombre">{{ titular_nombre }}</div>
+                    <div class="cargo">Titular de grupo</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            Documento institucional de seguimiento académico y convivencial.
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cambiar Contraseña</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .card-cambiar {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 450px;
+            width: 100%;
+        }
+        .btn-cambiar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            padding: 12px;
+            font-weight: bold;
+        }
+        .btn-cambiar:hover {
+            transform: translateY(-2px);
+        }
+        
+        /* Estilo para el grupo de contraseña con el ojo */
+        .password-group {
+            position: relative;
+        }
+        
+        .password-toggle {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #999;
+            z-index: 10;
+            background: white;
+            padding: 0 5px;
+            transition: color 0.3s ease;
+        }
+        
+        .password-toggle:hover {
+            color: #667eea;
+        }
+        
+        /* Requisitos de contraseña */
+        .password-requirements {
+            font-size: 0.8rem;
+            margin-top: 8px;
+        }
+        
+        .requirement {
+            color: #999;
+            transition: color 0.3s ease;
+        }
+        
+        .requirement.valid {
+            color: #28a745;
+        }
+        
+        .requirement.invalid {
+            color: #dc3545;
+        }
+        
+        .alert {
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="card-cambiar">
+        <div class="card-header bg-dark text-white text-center py-3">
+            <h5 class="mb-0"><i class="fas fa-key me-2"></i>Cambiar Contraseña</h5>
+        </div>
+        <div class="card-body p-4">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show">
+                            <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-triangle' }} me-2"></i>
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            
+            <form method="POST" id="cambiarClaveForm">
+                <div class="mb-3">
+                    <label class="form-label">Contraseña Actual</label>
+                    <div class="password-group">
+                        <input type="password" name="clave_actual" id="clave_actual" class="form-control" required>
+                        <i class="fas fa-eye password-toggle" data-target="clave_actual"></i>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Nueva Contraseña</label>
+                    <div class="password-group">
+                        <input type="password" name="clave_nueva" id="clave_nueva" class="form-control" required>
+                        <i class="fas fa-eye password-toggle" data-target="clave_nueva"></i>
+                    </div>
+                    <div class="password-requirements" id="passwordRequirements">
+                        <small class="requirement" id="req-length">
+                            <i class="fas fa-circle me-1"></i>Mínimo 6 caracteres
+                        </small>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Confirmar Nueva Contraseña</label>
+                    <div class="password-group">
+                        <input type="password" name="clave_confirmar" id="clave_confirmar" class="form-control" required>
+                        <i class="fas fa-eye password-toggle" data-target="clave_confirmar"></i>
+                    </div>
+                    <div class="password-requirements">
+                        <small class="requirement" id="req-match">
+                            <i class="fas fa-circle me-1"></i>Las contraseñas coinciden
+                        </small>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-cambiar text-white w-100" id="submitBtn">
+                    <i class="fas fa-save me-2"></i>Cambiar Contraseña
+                </button>
+            </form>
+        </div>
+        <div class="card-footer text-center">
+            <a href="{{ url_for('admin_bp.panel') if session.get('rol') == 'admin' else url_for('auth_bp.panel_docente') }}" class="text-decoration-none">
+                <i class="fas fa-arrow-left me-1"></i>Volver al Panel
+            </a>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Toggle para mostrar/ocultar contraseña para todos los campos
+        document.querySelectorAll('.password-toggle').forEach(toggle => {
+            toggle.addEventListener('click', function() {
+                const targetId = this.getAttribute('data-target');
+                const passwordInput = document.getElementById(targetId);
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                this.classList.toggle('fa-eye');
+                this.classList.toggle('fa-eye-slash');
+            });
+        });
+        
+        // Validar requisitos de contraseña en tiempo real
+        const nuevaClave = document.getElementById('clave_nueva');
+        const confirmarClave = document.getElementById('clave_confirmar');
+        const reqLength = document.getElementById('req-length');
+        const reqMatch = document.getElementById('req-match');
+        const submitBtn = document.getElementById('submitBtn');
+        
+        function validatePassword() {
+            const password = nuevaClave.value;
+            const confirm = confirmarClave.value;
+            let isValid = true;
+            
+            // Validar longitud
+            if (password.length >= 6) {
+                reqLength.classList.remove('invalid');
+                reqLength.classList.add('valid');
+                reqLength.innerHTML = '<i class="fas fa-check-circle me-1"></i>Mínimo 6 caracteres';
+            } else {
+                reqLength.classList.remove('valid');
+                reqLength.classList.add('invalid');
+                reqLength.innerHTML = '<i class="fas fa-times-circle me-1"></i>Mínimo 6 caracteres';
+                isValid = false;
+            }
+            
+            // Validar coincidencia
+            if (password === confirm && password !== '') {
+                reqMatch.classList.remove('invalid');
+                reqMatch.classList.add('valid');
+                reqMatch.innerHTML = '<i class="fas fa-check-circle me-1"></i>Las contraseñas coinciden';
+            } else {
+                reqMatch.classList.remove('valid');
+                reqMatch.classList.add('invalid');
+                reqMatch.innerHTML = '<i class="fas fa-times-circle me-1"></i>Las contraseñas coinciden';
+                isValid = false;
+            }
+            
+            // Habilitar/deshabilitar botón
+            submitBtn.disabled = !isValid;
+        }
+        
+        nuevaClave.addEventListener('keyup', validatePassword);
+        confirmarClave.addEventListener('keyup', validatePassword);
+        
+        // Validación inicial
+        validatePassword();
+    </script>
+</body>
+</html>

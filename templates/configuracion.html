@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuración - Períodos Académicos</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { background: #f0f2f5; }
+        .periodo-card { transition: all 0.3s ease; border-radius: 15px; }
+        .periodo-card:hover { transform: translateY(-5px); }
+        .periodo-activo { border: 2px solid #28a745; background: #e8f5e9; }
+        .periodo-inactivo { opacity: 0.7; }
+        .btn-periodo { transition: all 0.2s ease; }
+        .btn-periodo:hover { transform: translateY(-2px); }
+        .info-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-dark bg-dark mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('admin_bp.panel') }}"><i class="fas fa-arrow-left me-2"></i>Volver al Panel</a>
+            <span class="navbar-text"><i class="fas fa-sliders-h me-2"></i>Configuración Académica</span>
+        </div>
+    </nav>
+
+    <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show">{{ message }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="row">
+            <div class="col-md-8 mx-auto">
+                <div class="card shadow">
+                    <div class="card-header bg-dark text-white"><h5 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>Períodos Académicos</h5></div>
+                    <div class="card-body">
+                        <div class="alert alert-info info-card">
+                            <i class="fas fa-info-circle me-2"></i><strong>¿Cómo funciona?</strong>
+                            <ul class="mb-0 mt-2"><li>Hay <strong>4 períodos académicos</strong> independientes</li><li>Cada período tiene sus propias 10 evaluaciones y 10 tareas</li><li>El <strong>período activo</strong> es el que los docentes pueden editar</li><li>Al final del año, se promedian los 4 períodos para la nota final</li></ul>
+                        </div>
+
+                        <div class="row g-4 mt-2">
+                            <div class="col-md-6">
+                                <div class="card periodo-card {{ 'periodo-activo' if periodo_activo == 1 else 'periodo-inactivo' }}">
+                                    <div class="card-body text-center"><div class="display-4">📘</div><h4>Período 1</h4><p class="text-muted">25% de la nota final</p>
+                                    {% if periodo_activo == 1 %}<span class="badge bg-success"><i class="fas fa-check-circle me-1"></i>Activo</span>
+                                    {% else %}<form method="POST" action="{{ url_for('configuracion_bp.set_periodo') }}"><input type="hidden" name="periodo" value="1"><button type="submit" class="btn btn-outline-primary btn-sm btn-periodo"><i class="fas fa-play me-1"></i>Activar</button></form>{% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card periodo-card {{ 'periodo-activo' if periodo_activo == 2 else 'periodo-inactivo' }}">
+                                    <div class="card-body text-center"><div class="display-4">📗</div><h4>Período 2</h4><p class="text-muted">25% de la nota final</p>
+                                    {% if periodo_activo == 2 %}<span class="badge bg-success"><i class="fas fa-check-circle me-1"></i>Activo</span>
+                                    {% else %}<form method="POST" action="{{ url_for('configuracion_bp.set_periodo') }}"><input type="hidden" name="periodo" value="2"><button type="submit" class="btn btn-outline-primary btn-sm btn-periodo"><i class="fas fa-play me-1"></i>Activar</button></form>{% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card periodo-card {{ 'periodo-activo' if periodo_activo == 3 else 'periodo-inactivo' }}">
+                                    <div class="card-body text-center"><div class="display-4">📙</div><h4>Período 3</h4><p class="text-muted">25% de la nota final</p>
+                                    {% if periodo_activo == 3 %}<span class="badge bg-success"><i class="fas fa-check-circle me-1"></i>Activo</span>
+                                    {% else %}<form method="POST" action="{{ url_for('configuracion_bp.set_periodo') }}"><input type="hidden" name="periodo" value="3"><button type="submit" class="btn btn-outline-primary btn-sm btn-periodo"><i class="fas fa-play me-1"></i>Activar</button></form>{% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card periodo-card {{ 'periodo-activo' if periodo_activo == 4 else 'periodo-inactivo' }}">
+                                    <div class="card-body text-center"><div class="display-4">📕</div><h4>Período 4</h4><p class="text-muted">25% de la nota final</p>
+                                    {% if periodo_activo == 4 %}<span class="badge bg-success"><i class="fas fa-check-circle me-1"></i>Activo</span>
+                                    {% else %}<form method="POST" action="{{ url_for('configuracion_bp.set_periodo') }}"><input type="hidden" name="periodo" value="4"><button type="submit" class="btn btn-outline-primary btn-sm btn-periodo"><i class="fas fa-play me-1"></i>Activar</button></form>{% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-warning mt-4"><i class="fas fa-exclamation-triangle me-2"></i><strong>Nota importante:</strong> Al cambiar el período activo, los docentes comenzarán a trabajar con las notas del nuevo período. Las notas de períodos anteriores se conservan.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

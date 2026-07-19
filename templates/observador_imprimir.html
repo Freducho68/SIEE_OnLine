@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Observador del Alumno</title>
+    <style>
+        @page {
+            size: letter;
+            margin: 15mm;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background: #f3f5f7;
+            color: #222;
+        }
+
+        .page {
+            max-width: 900px;
+            margin: 18px auto;
+            background: #fff;
+            border: 1px solid #d9d9d9;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.06);
+        }
+
+        .no-print {
+            padding: 14px 20px;
+            background: #0f4c81;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .no-print a {
+            color: #fff;
+            text-decoration: none;
+            background: rgba(255,255,255,0.14);
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 8px 14px;
+            border-radius: 8px;
+            margin-left: 8px;
+            font-size: 14px;
+        }
+
+        .documento {
+            padding: 24px 28px 30px;
+        }
+
+
+
+        .encabezado { display: flex; flex-direction: column; align-items: center; text-align: center; background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); padding: 14px 10px 12px; border-radius: 18px; margin-bottom: 18px; border: 2px dashed #fff; }
+        .encabezado .logo img { width: 80px; height: auto; display: block; margin: 0 auto 6px; filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.12)); }
+        .encabezado .inst-lema { font-family: 'Baloo 2', cursive; font-size: 1.2em; font-weight: 800; color: #4a0e0e; margin: 2px 0 0; }
+        .encabezado .inst-legal { font-size: 0.82em; font-weight: 700; color: #636e72; margin: 3px 0 0; }
+        .obs-titulo { text-align: center; font-family: 'Baloo 2', cursive; color: #4ECDC4; margin: 8px 0 18px; font-size: 1.05em; text-transform: uppercase; letter-spacing: 1px; }
+        .datos-estudiante {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 18px;
+            font-size: 14px;
+        }
+
+        .datos-estudiante td {
+            border: 1px solid #cfd8e3;
+            padding: 8px 10px;
+        }
+
+        .label {
+            font-weight: bold;
+            color: #0f4c81;
+            background: #f5f9fc;
+            width: 18%;
+        }
+
+        .valor {
+            width: 32%;
+        }
+
+        .periodo {
+            border: 1px solid #cfd8e3;
+            margin-bottom: 14px;
+        }
+
+        .periodo-titulo {
+            background: #0f4c81;
+            color: white;
+            font-weight: bold;
+            padding: 8px 12px;
+            font-size: 14px;
+            letter-spacing: 0.3px;
+        }
+
+        .periodo-cuerpo {
+            padding: 12px;
+        }
+
+        .observacion-box {
+            min-height: 72px;
+            border: 1px solid #d8e0e8;
+            padding: 10px;
+            background: #fff;
+            line-height: 1.45;
+            font-size: 14px;
+            white-space: pre-wrap;
+        }
+
+        .fallas {
+            margin-top: 8px;
+            font-size: 13px;
+            font-weight: bold;
+            color: #6b4b00;
+        }
+
+        .seccion {
+            border: 1px solid #cfd8e3;
+            margin-top: 16px;
+        }
+
+        .seccion-titulo {
+            background: #eef5fb;
+            color: #0f4c81;
+            font-weight: bold;
+            padding: 8px 12px;
+            border-bottom: 1px solid #cfd8e3;
+            font-size: 14px;
+        }
+
+        .seccion-cuerpo {
+            padding: 12px;
+            min-height: 60px;
+            white-space: pre-wrap;
+            line-height: 1.45;
+            font-size: 14px;
+        }
+
+        .resultado {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 16px;
+            font-size: 14px;
+        }
+
+        .resultado td {
+            border: 1px solid #cfd8e3;
+            padding: 10px 12px;
+        }
+
+        .resultado .label {
+            width: 22%;
+        }
+
+        .firmas {
+            display: flex;
+            justify-content: space-between;
+            gap: 30px;
+            margin-top: 55px;
+        }
+
+        .firma {
+            width: 48%;
+            text-align: center;
+        }
+
+        .firma-img {
+            max-height: 85px;
+            max-width: 220px;
+            object-fit: contain;
+            display: block;
+            margin: 0 auto 8px;
+        }
+
+        .linea {
+            border-top: 1px solid #000;
+            width: 85%;
+            margin: 0 auto 8px;
+        }
+
+        .firma .nombre {
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .firma .cargo {
+            font-size: 13px;
+            color: #444;
+            margin-top: 3px;
+        }
+
+        @media print {
+            body {
+                background: white;
+            }
+
+            .page {
+                margin: 0;
+                max-width: 100%;
+                border: none;
+                box-shadow: none;
+            }
+
+            .no-print {
+                display: none !important;
+            }
+
+            .documento {
+                padding: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <div class="no-print">
+            <div style="color:white; font-weight:bold;">Observador del Alumno</div>
+            <div>
+                <a href="{{ url_for('boletin_bp.editar_observador', id_estudiante=estudiante['ID_Estudiante']) }}">Editar</a>
+                <a href="{{ url_for('boletin_bp.boletin', id_estudiante=estudiante['ID_Estudiante']) }}">Volver al boletín</a>
+                <a href="javascript:window.print()">Imprimir</a>
+            </div>
+        </div>
+
+        <div class="documento">
+            <p class="inst-lema">Educando con Amor y Diversión</p>
+                <p class="inst-legal">Res. 002336 de 2024 | DANE 354498002494</p>
+            </div>
+            <h2 style="text-align:center; font-family:\'Baloo 2\',cursive; color:#4ECDC4; margin:8px 0 15px; font-size:1.05em; text-transform:uppercase; letter-spacing:1px;">Observador del Alumno · Año Lectivo {{ current_year }}</h2>
+
+            <div class="encabezado">
+                <div class="logo">
+                    <img src="{{ url_for('static', filename='img/logo_colegio.png') }}"
+                         alt="Logo del colegio"
+                         onerror="this.style.display='none';">
+                </div>
+                <p class="inst-lema">Educando con Amor y Diversión</p>
+                <p class="inst-legal">Res. 002336 de 2024 | DANE 354498002494</p>
+            </div>
+            <p class="obs-titulo">Observador del Alumno · Año Lectivo {{ current_year }}</p>
+
+            <table class="datos-estudiante">
+                <tr>
+                    <td class="label">Estudiante</td>
+                    <td class="valor">{{ estudiante.Nombres }} {{ estudiante.Apellidos }}</td>
+                    <td class="label">Grado</td>
+                    <td class="valor">{{ estudiante.Nombre_Grupo }}</td>
+                </tr>
+            </table>
+
+            {% for p in [1, 2, 3, 4] %}
+            {% set fila = periodos|selectattr('Periodo', 'equalto', p)|list|first %}
+            <div class="periodo">
+                <div class="periodo-titulo">
+                    {{ ['PRIMER', 'SEGUNDO', 'TERCER', 'CUARTO'][p-1] }} PERÍODO
+                </div>
+                <div class="periodo-cuerpo">
+                    <div class="observacion-box">{{ fila.Observacion if fila and fila.Observacion else 'Sin observación registrada.' }}</div>
+                    <div class="fallas">Fallas: {{ fila.Fallas if fila else 0 }}</div>
+                </div>
+            </div>
+            {% endfor %}
+
+            <div class="seccion">
+                <div class="seccion-titulo">OBSERVACIONES GENERALES</div>
+                <div class="seccion-cuerpo">{{ anual.Observaciones_Generales if anual and anual.Observaciones_Generales else '' }}</div>
+            </div>
+
+            <table class="resultado">
+                <tr>
+                    <td class="label">Concepto final</td>
+                    <td>{{ anual.Concepto_Final if anual and anual.Concepto_Final else '' }}</td>
+                </tr>
+                <tr>
+                    <td class="label">Promovido a</td>
+                    <td>{{ anual.Promovido_A if anual and anual.Promovido_A else '' }}</td>
+                </tr>
+            </table>
+
+            <div class="firmas">
+                <div class="firma">
+                    {% if firma_directora %}
+                        <img src="{{ url_for('static', filename=firma_directora) }}" alt="Firma directora" class="firma-img">
+                    {% endif %}
+                    <div class="linea"></div>
+                    <div class="nombre">{{ directora_nombre }}</div>
+                    <div class="cargo">Directora</div>
+                </div>
+
+                <div class="firma">
+                    {% if firma_titular %}
+                        <img src="{{ url_for('static', filename=firma_titular) }}" alt="Firma titular" class="firma-img">
+                    {% endif %}
+                    <div class="linea"></div>
+                    <div class="nombre">{{ titular_nombre }}</div>
+                    <div class="cargo">Titular de grupo</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

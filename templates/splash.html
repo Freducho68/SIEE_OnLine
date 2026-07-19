@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestión Académica</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .splash-container {
+            text-align: center;
+            animation: fadeIn 0.5s ease-in;
+            z-index: 2;
+            position: relative;
+        }
+        
+        .logo-container {
+            animation: bounce 2s ease-in-out infinite;
+            display: inline-block;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            padding: 10px;
+        }
+        
+        .logo-colegio {
+            width: 180px;
+            height: 180px;
+            object-fit: contain;
+            filter: drop-shadow(0 10px 25px rgba(0,0,0,0.2));
+            animation: logoGlow 2s ease-in-out infinite;
+            background: white;
+            border-radius: 50%;
+            padding: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .logo-colegio {
+                width: 120px;
+                height: 120px;
+            }
+        }
+        
+        .title {
+            color: white;
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-top: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            animation: slideIn 0.8s ease-out;
+        }
+        
+        .subtitle {
+            color: rgba(255,255,255,0.9);
+            font-size: 1.2rem;
+            margin-top: 10px;
+            animation: slideIn 0.8s ease-out 0.2s both;
+        }
+        
+        .loader {
+            margin-top: 40px;
+            animation: fadeIn 0.8s ease-in 0.3s both;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255,255,255,0.3);
+            border-top: 5px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        .loading-text {
+            color: white;
+            margin-top: 15px;
+            font-size: 0.9rem;
+        }
+        
+        .progress {
+            margin-top: 30px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 10px;
+            overflow: hidden;
+            width: 300px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .progress-bar {
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            width: 0%;
+            height: 4px;
+            animation: loadProgress 3s ease-out forwards;
+        }
+        
+        .footer-splash {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            color: rgba(255,255,255,0.6);
+            font-size: 0.8rem;
+            animation: fadeIn 0.8s ease-in 0.8s both;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-15px) scale(1.02); }
+        }
+        
+        @keyframes logoGlow {
+            0%, 100% { filter: drop-shadow(0 10px 25px rgba(0,0,0,0.2)) brightness(1); }
+            50% { filter: drop-shadow(0 15px 35px rgba(0,0,0,0.3)) brightness(1.05); }
+        }
+        
+        @keyframes loadProgress {
+            0% { width: 0%; }
+            20% { width: 20%; }
+            40% { width: 45%; }
+            60% { width: 70%; }
+            80% { width: 85%; }
+            100% { width: 100%; }
+        }
+        
+        .particle {
+            position: absolute;
+            background: rgba(255,255,255,0.4);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: float 6s infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0) translateX(0); opacity: 0; }
+            50% { opacity: 0.6; }
+        }
+    </style>
+</head>
+<body>
+    <div class="preload-logo" style="position: absolute; width: 1px; height: 1px; opacity: 0;">
+        <img src="{{ url_for('static', filename='img/logo_colegio.png') }}" alt="">
+    </div>
+
+    <div class="splash-container">
+        <div class="logo-container">
+            <img src="{{ url_for('static', filename='img/logo_colegio.png') }}" 
+                 alt="Logo del Colegio" 
+                 class="logo-colegio"
+                 onerror="this.src='https://via.placeholder.com/180x180?text=COLEGIO'">
+        </div>
+        
+        <div class="title">
+            Sistema de Gestión Académica
+        </div>
+        <div class="subtitle">
+            Innovación educativa para el futuro
+        </div>
+        
+        <div class="loader">
+            <div class="spinner"></div>
+            <div class="loading-text">
+                <i class="fas fa-cog fa-spin me-2"></i>
+                Cargando sistema...
+            </div>
+            <div class="progress">
+                <div class="progress-bar"></div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="footer-splash">
+        <i class="fas fa-copyright me-1"></i> 2024 - Todos los derechos reservados
+    </div>
+    
+    <script>
+        function createParticles() {
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                const size = Math.random() * 5 + 2;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 5 + 's';
+                particle.style.animationDuration = Math.random() * 3 + 4 + 's';
+                document.body.appendChild(particle);
+            }
+        }
+        
+        createParticles();
+        
+        setTimeout(function() {
+            window.location.href = "/login";
+        }, 3000);
+    </script>
+</body>
+</html>

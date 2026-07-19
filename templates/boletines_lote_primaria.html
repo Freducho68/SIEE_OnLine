@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Boletines Primaria (Lote) - {{ carga.Nombre_Grupo }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --green-border: #4caf50;
+            --text-main: #111;
+            --text-muted: #555;
+            --green-light: #e8f5e9;
+        }
+        @page { size: letter; margin: 10mm; }
+        * { box-sizing: border-box; }
+        body { 
+            font-family: 'Nunito', sans-serif; 
+            font-size: 11px; 
+            margin: 0; 
+            background: #fdfbf7; 
+            color: var(--text-main);
+        }
+
+        /* --- ESTILOS DE IMPRESIÓN EN LOTE --- */
+        .no-print { 
+            background: #333; padding: 15px 25px; display: flex; 
+            justify-content: space-between; align-items: center; 
+            color: white; position: sticky; top: 0; z-index: 1000; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
+        }
+        .no-print button { 
+            background: #4caf50; border: none; color: white; 
+            padding: 8px 20px; border-radius: 20px; font-weight: bold; 
+            cursor: pointer; font-size: 14px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); 
+        }
+
+        .boletin-wrapper { page-break-after: always; padding: 20px 0; }
+        .boletin-wrapper:last-child { page-break-after: auto; }
+
+        .boletin-container {
+            max-width: 190mm; margin: 0 auto; background: #fff;
+            padding: 15px; border: 1px solid #e0e0e0; border-radius: 10px;
+        }
+
+        /* --- ENCABEZADO UNIFICADO --- */
+        .header { 
+            display: flex; 
+            align-items: center;
+            background: linear-gradient(90deg, #fdfbfb 0%, #f4f8f4 100%);
+            padding: 15px; 
+            border-radius: 10px; 
+            margin-bottom: 10px; 
+        }
+        .header .logo { width: 130px; margin-right: 20px; }
+        .header .logo img { width: 100%; height: auto; display: block; filter: drop-shadow(1px 1px 3px rgba(0,0,0,0.1)); }
+        .header-text { flex-grow: 1; text-align: center; }
+        .inst-nombre { font-size: 1.6em; font-weight: 800; margin: 0; text-transform: uppercase; letter-spacing: 0.5px; }
+        .inst-lema { font-size: 1.1em; font-weight: 700; margin: 4px 0; }
+        .inst-legal { font-size: 0.85em; color: var(--text-muted); margin: 0; }
+
+        .header-sub { text-align: center; font-size: 12px; font-weight: 800; margin-bottom: 15px; color: #2e7d32; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        /* --- INFO ESTUDIANTE --- */
+        .info-estudiante { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        .chip { background: #fff; border: 1.5px solid var(--green-border); padding: 8px 12px; border-radius: 8px; }
+        .label { font-size: 0.75em; font-weight: 800; color: var(--green-border); text-transform: uppercase; display: block; margin-bottom: 2px; }
+        .value { font-size: 1em; font-weight: 800; color: #111; text-transform: uppercase; }
+
+        /* --- TABLA MATERIAS PRIMARIA --- */
+        .tabla-materias { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
+        
+        .tabla-materias tr.fila-area td { 
+            background-color: #eef7eb; 
+            border-bottom: 2px solid #c8e6c9; 
+            color: #2e7d32; 
+            padding: 10px 15px; 
+            font-size: 12px; 
+            font-weight: 800; 
+            text-transform: uppercase; 
+            border-radius: 6px; 
+        }
+
+        .tabla-materias tr.fila-materia td { 
+            padding: 8px 15px; 
+            font-weight: 800; 
+            font-size: 11px; 
+            border-bottom: 1px solid #f0f0f0; 
+            vertical-align: middle; 
+            background: #fff; 
+        }
+        .tabla-materias tr.fila-materia td.mat-nombre { width: 45%; color: #111; }
+        .tabla-materias tr.fila-materia td.mat-notas { width: auto; }
+        .tabla-materias tr.fila-materia td.mat-nivel { text-align: center; width: 15%; font-size: 10px; }
+        .tabla-materias tr.fila-materia td.mat-prom  { text-align: center; width: 12%; font-size: 12px; }
+
+        .notas-inline { display: flex; gap: 5px; }
+        .nota-chip { display: inline-flex; flex-direction: column; align-items: center; min-width: 32px; padding: 2px 3px; border-radius: 6px; font-size: 9px; border: 1px solid transparent; }
+        .nota-chip span.periodo { font-size: 7.5px; font-weight: 700; color: #888; }
+        .nota-chip span.valor   { font-weight: 800; font-size: 11px; }
+        
+        .nota-chip.sup  { background: #e8f5e9; border-color: #c8e6c9; color: #2e7d32; }
+        .nota-chip.alto { background: #e3f2fd; border-color: #bbdefb; color: #1565c0; }
+        .nota-chip.bas  { background: #fff8e1; border-color: #ffecb3; color: #f57f17; }
+        .nota-chip.bajo { background: #ffebee; border-color: #ffcdd2; color: #c62828; }
+        .nota-chip.null { background: #f5f5f5; border-color: #e0e0e0; color: #9e9e9e; }
+
+        .tabla-materias tr.fila-indicadores td { 
+            padding: 6px 15px 10px 30px; 
+            font-size: 10px; 
+            color: #555; 
+            line-height: 1.4; 
+            font-weight: 600; 
+            background: #fafafa; 
+            border-bottom: 2px solid #f0f0f0; 
+        }
+
+        .nivel-sup  { color: #1b5e20; }
+        .nivel-alto { color: #1565c0; }
+        .nivel-bas  { color: #f57f17; }
+        .nivel-bajo { color: #c62828; }
+
+        /* --- OBSERVACIONES --- */
+        .observaciones {
+            border: 2px dashed #ff8a80; border-radius: 10px;
+            padding: 12px; margin-bottom: 15px; background: #fff;
+        }
+        .obs-titulo { font-size: 12px; font-weight: 800; color: #d32f2f; margin-bottom: 5px; text-transform: uppercase; }
+        .obs-texto  { font-weight: 600; font-size: 11.5px; color: #333; }
+
+        /* --- ESCALA DE VALORACIÓN --- */
+        .escala-wrapper { margin-bottom: 20px; }
+        .escala-titulo { font-size: 12px; font-weight: 800; color: #2e7d32; margin-bottom: 5px; text-transform: uppercase; }
+        .tabla-escala { width: 100%; border-collapse: collapse; font-size: 9.5px; border-radius: 8px; overflow: hidden; border: 1px solid #e0e0e0; }
+        .tabla-escala th { background: #eef7eb; color: #2e7d32; padding: 6px 4px; font-weight: 800; border: 1px solid #c8e6c9; text-align: center; }
+        .tabla-escala th.th-prom { background: #c8e6c9; }
+        .tabla-escala td { border: 1px solid #e0e0e0; padding: 5px; text-align: center; font-weight: 700; background: #fff; }
+        .tabla-escala td:first-child { background: #fafafa; font-weight: 800; text-align: left; padding-left: 8px; }
+
+        /* --- FIRMAS --- */
+        .firmas { display: flex; justify-content: space-around; margin-top: 45px; text-align: center; }
+        .firma-box { width: 40%; }
+        
+        .firma-digital-texto {
+            font-family: 'Great Vibes', cursive;
+            font-size: 24px;
+            font-weight: bold;
+            color: #16315c;
+            transform: rotate(-1.5deg);
+            display: block;
+            user-select: none;
+            height: auto;
+            line-height: 1;
+            margin: 0 auto -2px auto;
+        }
+        
+        .firma-linea { border-top: 1px solid #333; width: 80%; margin: 0 auto; }
+        .firma-cargo  { font-size: 10px; font-weight: 700; color: var(--text-muted); }
+
+        @media print { 
+            .no-print { display: none; } 
+            body { background: #fff; }
+            .boletin-wrapper { padding: 0; margin: 0; }
+            .boletin-container { border: none; padding: 0; }
+            .tabla-materias tr.fila-area td, .tabla-escala th, .nota-chip { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        }
+    </style>
+</head>
+<body>
+    <div class="no-print">
+        <span style="font-family: 'Nunito', sans-serif; font-size: 1.3em; font-weight: 800;">🎈 IMPRESIÓN EN LOTE: {{ carga.Nombre_Grupo }}</span>
+        <button onclick="window.print()">🖨️ IMPRIMIR TODO EL GRUPO</button>
+    </div>
+
+    {% for b in boletines %}
+    <div class="boletin-wrapper">
+        <div class="boletin-container">
+
+            <div class="header">
+                <div class="logo">
+                    <img src="{{ url_for('static', filename='img/logo_colegio.png') }}" alt="Logo Chiquilladas">
+                </div>
+                <div class="header-text">
+                    <p class="inst-nombre">CENTRO EDUCATIVO CHIQUILLADAS</p>
+                    <p class="inst-lema">Formación Integral y Recreativa</p>
+                    <p class="inst-legal">Res. 002336 del 26 de febrero de 2024<br>DANE 354498002494</p>
+                </div>
+            </div>
+            <div class="header-sub">INFORME DE VALORACIÓN ACADÉMICA — PERIODO {{ b.periodo_actual }}°</div>
+
+            <div class="info-estudiante">
+                <div class="chip">
+                    <span class="label">ESTUDIANTE:</span>
+                    <span class="value">{{ b.estudiante.Nombres | upper }} {{ b.estudiante.Apellidos | upper }}</span>
+                </div>
+                <div class="chip"><span class="label">GRADO:</span><span class="value">{{ b.estudiante.Nombre_Grupo }}</span></div>
+                <div class="chip"><span class="label">PERIODO:</span><span class="value">{{ b.periodo_actual }}°</span></div>
+                <div class="chip"><span class="label">FALLAS:</span><span class="value">{{ b.fallas_periodo or 0 }}</span></div>
+            </div>
+
+            <table class="tabla-materias">
+                <tbody>
+                    {% set area_actual = namespace(nombre='') %}
+                    {% for m in b.materias %}
+
+                        {% if m.Nombre_Area != area_actual.nombre %}
+                            {% set area_actual.nombre = m.Nombre_Area %}
+                            <tr class="fila-area">
+                                <td colspan="4">{{ m.Nombre_Area }}</td>
+                            </tr>
+                        {% endif %}
+
+                        {% macro nivel_cls(n) %}{{ 'nivel-sup' if n and n >= 4.5 else 'nivel-alto' if n and n >= 4.0 else 'nivel-bas' if n and n >= 3.0 else 'nivel-bajo' if n else '' }}{% endmacro %}
+                        {% macro nivel_txt(n) %}{{ 'SUPERIOR' if n and n >= 4.5 else 'ALTO' if n and n >= 4.0 else 'BÁSICO' if n and n >= 3.0 else 'BAJO' if n else '—' }}{% endmacro %}
+                        {% macro chip_cls(n) %}{{ 'sup' if n and n >= 4.5 else 'alto' if n and n >= 4.0 else 'bas' if n and n >= 3.0 else 'bajo' if n else 'null' }}{% endmacro %}
+
+                        <tr class="fila-materia">
+                            <td class="mat-nombre">{{ m.Nombre_Materia }}</td>
+                            <td class="mat-notas">
+                                <div class="notas-inline">
+                                    {% for p, nota in [(1, m.nota_p1), (2, m.nota_p2), (3, m.nota_p3), (4, m.nota_p4)] %}
+                                    <div class="nota-chip {{ chip_cls(nota) }}">
+                                        <span class="periodo">P{{ p }}</span>
+                                        <span class="valor">{{ '%.1f'|format(nota) if nota is not none else '—' }}</span>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </td>
+                            <td class="mat-nivel {{ nivel_cls(m.promedio_anual) }}">{{ nivel_txt(m.promedio_anual) }}</td>
+                            <td class="mat-prom {{ nivel_cls(m.promedio_anual) }}">
+                                <strong>{{ '%.1f'|format(m.promedio_anual) if m.promedio_anual is not none else '—' }}</strong>
+                            </td>
+                        </tr>
+
+                        {% if m.indicadores %}
+                        <tr class="fila-indicadores">
+                            <td colspan="4">
+                                {% for ind in m.indicadores %}• {{ ind }}{% if not loop.last %}<br>{% endif %}{% endfor %}
+                            </td>
+                        </tr>
+                        {% endif %}
+
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            {% if b.observacion_periodo %}
+            <div class="observaciones">
+                <div class="obs-titulo">✏️ OBSERVACIONES GENERALES:</div>
+                <div class="obs-texto">{{ b.observacion_periodo }}</div>
+            </div>
+            {% endif %}
+
+            <div class="escala-wrapper">
+                <div class="escala-titulo">ESCALA DE VALORACIÓN</div>
+                <table class="tabla-escala">
+                    <thead>
+                        <tr>
+                            <th>Rendimiento</th>
+                            <th>SUPERIOR<br>4.5–5.0</th>
+                            <th>ALTO<br>4.0–4.4</th>
+                            <th>BÁSICO<br>3.0–3.9</th>
+                            <th>BAJO<br>1.0–2.9</th>
+                            <th>Desempeño Gral.</th>
+                            <th class="th-prom">Prom. 1</th>
+                            <th class="th-prom">Prom. 2</th>
+                            <th class="th-prom">Prom. 3</th>
+                            <th class="th-prom">Prom. 4</th>
+                            <th class="th-prom">Puesto 1</th>
+                            <th class="th-prom">Puesto 2</th>
+                            <th class="th-prom">Puesto 3</th>
+                            <th class="th-prom">Puesto 4</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>{{ b.estudiante.Nombres | upper }} {{ b.estudiante.Apellidos | upper }}</td>
+                            <td>{{ b.notas_escala.superior or '—' }}</td>
+                            <td>{{ b.notas_escala.alto or '—' }}</td>
+                            <td>{{ b.notas_escala.basico or '—' }}</td>
+                            <td>{{ b.notas_escala.bajo or '—' }}</td>
+                            <td>
+                                {% if b.promedio_general is not none %}
+                                    {% if b.promedio_general >= 4.5 %}SUPERIOR
+                                    {% elif b.promedio_general >= 4.0 %}ALTO
+                                    {% elif b.promedio_general >= 3.0 %}BÁSICO
+                                    {% else %}BAJO{% endif %}
+                                {% else %}—{% endif %}
+                            </td>
+                            {% for p in [1,2,3,4] %}
+                            <td>{{ '%.1f'|format(b.promedios_por_periodo[p]) if b.promedios_por_periodo[p] is not none else '—' }}</td>
+                            {% endfor %}
+                            {% for p in [1,2,3,4] %}
+                            <td>{{ b.puestos_por_periodo[p] if b.puestos_por_periodo[p] else '—' }}</td>
+                            {% endfor %}
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="firmas">
+                <div class="firma-box">
+                    <span class="firma-digital-texto">{{ b.titular_nombre | title }}</span>
+                    <div class="firma-linea"></div>
+                    <div class="firma-cargo">Docente Titular</div>
+                </div>
+                <div class="firma-box">
+                    <span class="firma-digital-texto">{{ b.directora_nombre | title }}</span>
+                    <div class="firma-linea"></div>
+                    <div class="firma-cargo">Directora</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    {% endfor %}
+</body>
+</html>

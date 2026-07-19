@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="es" data-bs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ app_name }} - Panel Administrativo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='estilos.css') }}" rel="stylesheet">
+    <style>
+        .card-menu {
+            border-top: 4px solid;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            height: 100%;
+        }
+        .card-menu:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.15);
+        }
+        
+        /* Colores de las tarjetas */
+        .card-docentes { border-top-color: #2c7be5; }
+        .card-estudiantes { border-top-color: #f5803e; }
+        .card-grupos { border-top-color: #00d27a; }
+        .card-asignaturas { border-top-color: #39afd1; }
+        .card-plan { border-top-color: #6f42c1; }
+        .card-carga { border-top-color: #e63757; }
+        .card-backups { border-top-color: #12263f; }
+        .card-masiva { border-top-color: #fd7e14; }
+        
+        .icon-box {
+            width: 65px;
+            height: 65px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 1.8rem;
+        }
+        
+        .icon-docentes { background: rgba(44, 123, 229, 0.15); color: #2c7be5; }
+        .icon-estudiantes { background: rgba(245, 128, 62, 0.15); color: #f5803e; }
+        .icon-grupos { background: rgba(0, 210, 122, 0.15); color: #00d27a; }
+        .icon-asignaturas { background: rgba(57, 175, 209, 0.15); color: #39afd1; }
+        .icon-plan { background: rgba(111, 66, 193, 0.15); color: #6f42c1; }
+        .icon-carga { background: rgba(230, 55, 87, 0.15); color: #e63757; }
+        .icon-backups { background: rgba(18, 38, 63, 0.15); color: #12263f; }
+        .icon-masiva { background: rgba(253, 126, 20, 0.15); color: #fd7e14; }
+        
+        /* Dropdown menu */
+        .dropdown-menu {
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+        
+        .dropdown-item:hover {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .dropdown-item i {
+            width: 20px;
+        }
+        
+        /* Badge de novedad */
+        .badge-nuevo {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #28a745;
+            color: white;
+            font-size: 0.65rem;
+            padding: 2px 8px;
+            border-radius: 20px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        /* Tarjetas de estadísticas */
+        .stats-card {
+            transition: all 0.3s ease;
+            border: none;
+            border-radius: 15px;
+            background: #f8f9fa;
+        }
+        .stats-card:hover {
+            transform: translateY(-3px);
+            background: white;
+        }
+        
+        /* Separador */
+        .divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            margin: 30px 0 25px;
+        }
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .divider span {
+            padding: 0 15px;
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-dark bg-dark navbar-expand-lg mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('admin_bp.panel') }}">
+                <i class="fas fa-shield-alt me-2"></i>{{ app_name }} - Panel Administrativo
+            </a>
+            <div class="navbar-nav ms-auto">
+                <div class="dropdown">
+                    <button class="btn btn-outline-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-user-shield me-2"></i>Administrador
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li>
+                            <a class="dropdown-item" href="{{ url_for('auth_bp.cambiar_clave') }}">
+                                <i class="fas fa-key me-2"></i>Cambiar Contraseña
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <form action="{{ url_for('auth_bp.logout') }}" method="POST">
+                                <button type="submit" class="dropdown-item text-danger">
+                                    <i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Mensajes Flash -->
+        <div class="row mb-4">
+            <div class="col-12">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+            </div>
+        </div>
+
+        <!-- Título de sección de módulos -->
+        <div class="row mb-4">
+            <div class="col-12 text-center">
+                <h4 class="text-muted">
+                    <i class="fas fa-cogs me-2"></i>MÓDULOS DE ADMINISTRACIÓN
+                </h4>
+                <hr class="mx-auto" style="width: 100px; height: 3px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <p class="text-muted small mt-2">Gestione todos los aspectos del sistema académico</p>
+            </div>
+        </div>
+
+        <!-- 8 MÓDULOS: 2 filas de 4 -->
+        <div class="row g-4 mb-4">
+            <!-- 1. Docentes -->
+            <div class="col-md-6 col-lg-3">
+                <a href="{{ url_for('docentes_bp.docentes') }}" class="text-decoration-none">
+                    <div class="card card-menu card-docentes h-100">
+                        <div class="card-body text-center py-4">
+                            <div class="icon-box icon-docentes">
+                                <i class="fas fa-chalkboard-teacher"></i>
+                            </div>
+                            <h5 class="card-title mb-2">Docentes</h5>
+                            <p class="card-text text-muted mb-0 small">Gestión de profesores y personal</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <!-- 2. Estudiantes -->
+            <div class="col-md-6 col-lg-3">
+                <a href="{{ url_for('estudiantes_bp.estudiantes') }}" class="text-decoration-none">
+                    <div class="card card-menu card-estudiantes h-100">
+                        <div class="card-body text-center py-4">
+                            <div class="icon-box icon-estudiantes">
+                                <i class="fas fa-user-graduate"></i>
+                            </div>
+                            <h5 class="card-title mb-2">Estudiantes</h5>
+                            <p class="card-text text-muted mb-0 small">Matrícula y gestión estudiantil</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <!-- 3. Grupos -->
+            <div class="col-md-6 col-lg-3">
+                <a href="{{ url_for('grupos_bp.grupos') }}" class="text-decoration-none">
+                    <div class="card card-menu card-grupos h-100">
+                        <div class="card-body text-center py-4">
+                            <div class="icon-box icon-grupos">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <h5 class="card-title mb-2">Grupos</h5>
+                            <p class="card-text text-muted mb-0 small">Administrar grupos académicos</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <!-- 4. Asignaturas -->
+            <div class="col-md-6 col-lg-3">
+                <a href="{{ url_for('asignaturas_bp.asignaturas') }}" class="text-decoration-none">
+                    <div class="card card-menu card-asignaturas h-100">
+                        <div class="card-body text-center py-4">
+                            <div class="icon-box icon-asignaturas">
+                                <i class="fas fa-book"></i>
+                            </div>
+                            <h5 class="card-title mb-2">Asignaturas</h5>
+                            <p class="card-text text-muted mb-0 small">Materias y áreas académicas</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-5">
+            <!-- 5. Plan de Estudios -->
+            <div class="col-md-6 col-lg-3">
+                <a href="{{ url_for('plan_estudios_bp.plan_estudios') }}" class="text-decoration-none">
+                    <div class="card card-menu card-plan h-100">
+                        <div class="card-body text-center py-4">
+                            <div class="icon-box icon-plan">
+                                <i class="fas fa-clipboard-list"></i>
+                            </div>
+                            <h5 class="card-title mb-2">Plan de Estudios</h5>
+                            <p class="card-text text-muted mb-0 small">Asignaturas por grupo</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <!-- 6. Carga Académica -->
+            <div class="col-md-6 col-lg-3">
+                <a href="{{ url_for('carga_bp.carga') }}" class="text-decoration-none">
+                    <div class="card card-menu card-carga h-100">
+                        <div class="card-body text-center py-4">
+                            <div class="icon-box icon-carga">
+                                <i class="fas fa-tasks"></i>
+                            </div>
+                            <h5 class="card-title mb-2">Carga Académica</h5>
+                            <p class="card-text text-muted mb-0 small">Asignar docentes a grupos</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <!-- 7. Backups -->
+            <div class="col-md-6 col-lg-3">
+                <a href="{{ url_for('backups_bp.backups') }}" class="text-decoration-none">
+                    <div class="card card-menu card-backups h-100">
+                        <div class="card-body text-center py-4">
+                            <div class="icon-box icon-backups">
+                                <i class="fas fa-database"></i>
+                            </div>
+                            <h5 class="card-title mb-2">Backups</h5>
+                            <p class="card-text text-muted mb-0 small">Copias de seguridad</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <!-- 8. Carga Masiva -->
+            <div class="col-md-6 col-lg-3">
+                <a href="{{ url_for('carga_masiva_bp.carga_masiva') }}" class="text-decoration-none">
+                    <div class="card card-menu card-masiva h-100 position-relative">
+                        <span class="badge-nuevo"><i class="fas fa-star me-1"></i>NUEVO</span>
+                        <div class="card-body text-center py-4">
+                            <div class="icon-box icon-masiva">
+                                <i class="fas fa-upload"></i>
+                            </div>
+                            <h5 class="card-title mb-2">Carga Masiva</h5>
+                            <p class="card-text text-muted mb-0 small">Importar datos masivamente</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <!-- 9. Configuración (Períodos) -->
+            <div class="col-md-6 col-lg-3">
+                <a href="{{ url_for('configuracion_bp.configuracion') }}" class="text-decoration-none">
+                    <div class="card card-menu card-configuracion h-100">
+                        <div class="card-body text-center py-4">
+                            <div class="icon-box icon-configuracion">
+                                <i class="fas fa-calendar-alt"></i>
+                            </div>
+                            <h5 class="card-title mb-2">Configuración</h5>
+                            <p class="card-text text-muted mb-0 small">Períodos académicos</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- Separador visual -->
+        <div class="divider">
+            <span><i class="fas fa-chart-bar me-2"></i>ESTADÍSTICAS DEL SISTEMA</span>
+        </div>
+
+        <!-- Estadísticas - 4 tarjetas informativas -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-3 col-sm-6">
+                <div class="card stats-card text-center">
+                    <div class="card-body py-3">
+                        <i class="fas fa-chalkboard-teacher fa-2x text-primary"></i>
+                        <h3 class="mt-2 mb-0" id="total-docentes">-</h3>
+                        <small class="text-muted">Docentes Registrados</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="card stats-card text-center">
+                    <div class="card-body py-3">
+                        <i class="fas fa-user-graduate fa-2x text-success"></i>
+                        <h3 class="mt-2 mb-0" id="total-estudiantes">-</h3>
+                        <small class="text-muted">Estudiantes Registrados</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="card stats-card text-center">
+                    <div class="card-body py-3">
+                        <i class="fas fa-users fa-2x text-info"></i>
+                        <h3 class="mt-2 mb-0" id="total-grupos">-</h3>
+                        <small class="text-muted">Grupos Activos</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="card stats-card text-center">
+                    <div class="card-body py-3">
+                        <i class="fas fa-book fa-2x text-warning"></i>
+                        <h3 class="mt-2 mb-0" id="total-materias">-</h3>
+                        <small class="text-muted">Asignaturas</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="row mt-3 mb-4">
+            <div class="col-12 text-center text-muted">
+                <small>{{ app_name }} · versión {{ app_version }}</small>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        async function cargarEstadisticas() {
+            try {
+                const response = await fetch('/admin/estadisticas');
+                const data = await response.json();
+                
+                document.getElementById('total-docentes').textContent = data.docentes || 0;
+                document.getElementById('total-estudiantes').textContent = data.estudiantes || 0;
+                document.getElementById('total-grupos').textContent = data.grupos || 0;
+                document.getElementById('total-materias').textContent = data.materias || 0;
+            } catch (error) {
+                console.error('Error al cargar estadísticas:', error);
+                document.getElementById('total-docentes').textContent = '0';
+                document.getElementById('total-estudiantes').textContent = '0';
+                document.getElementById('total-grupos').textContent = '0';
+                document.getElementById('total-materias').textContent = '0';
+            }
+        }
+        
+        cargarEstadisticas();
+    </script>
+</body>
+</html>

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seleccionar Estudiante - Boletines</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body { background: #eef2f7; font-family: Arial, sans-serif; }
+        .navbar-custom { background: #0d6efd; }
+        .navbar-brand { color: #fff !important; font-weight: 700; }
+        .card-box { border: none; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,.08); }
+        .header-box { background: #0d6efd; color: #fff; font-weight: 700; padding: 14px 18px; border-radius: 12px 12px 0 0; }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-custom">
+    <div class="container-fluid px-3">
+        <a href="{{ url_for('auth_bp.panel_docente') }}" class="navbar-brand text-decoration-none">
+            <i class="bi bi-journal-check me-2"></i>Boletines y Observador
+        </a>
+        <div>
+            <a href="{{ url_for('auth_bp.panel_docente') }}" class="btn btn-outline-light btn-sm">
+                <i class="bi bi-arrow-left me-1"></i>Volver al panel
+            </a>
+        </div>
+    </div>
+</nav>
+
+<div class="container py-4">
+    <div class="card card-box">
+        <div class="header-box">
+            <i class="bi bi-people me-2"></i>{{ carga['Nombre_Materia'] }} - {{ carga['Nombre_Grupo'] }}
+        </div>
+        <div class="card-body">
+            <div class="d-flex justify-content-end mb-3">
+                <a href="{{ url_for('boletin_bp.boletines_lote', id_carga=carga['ID_Carga']) }}"
+                   class="btn btn-primary">
+                    <i class="bi bi-printer me-1"></i>Imprimir todo el grupo
+                </a>
+            </div>
+
+            {% if estudiantes and estudiantes|length > 0 %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Apellidos</th>
+                                <th>Nombres</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for estudiante in estudiantes %}
+                            <tr>
+                                <td>{{ estudiante['Apellidos'] }}</td>
+                                <td>{{ estudiante['Nombres'] }}</td>
+                                <td>
+                                    <div class="d-flex flex-wrap gap-2">
+                                        <a href="{{ url_for('boletin_bp.boletin', id_estudiante=estudiante['ID_Estudiante']) }}"
+                                           class="btn btn-warning btn-sm">
+                                            <i class="bi bi-printer me-1"></i>Boletín
+                                        </a>
+
+                                        <a href="{{ url_for('boletin_bp.observador', id_estudiante=estudiante['ID_Estudiante']) }}"
+                                           class="btn btn-secondary btn-sm">
+                                            <i class="bi bi-journal-text me-1"></i>Observador
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-warning mb-0">
+                    <i class="bi bi-exclamation-triangle me-2"></i>No hay estudiantes en este grupo.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+</body>
+</html>

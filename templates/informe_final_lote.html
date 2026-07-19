@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Informes Finales (Lote) - {{ carga.Nombre_Grupo }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --soft-blue: #8ecae6;
+            --primary: #FF6B6B;
+            --secondary: #4ECDC4;
+            --accent: #FFE66D;
+            --bg: #fdfbf7;
+            --text: #2d3436;
+        }
+        @page { size: letter; margin: 10mm; }
+        * { box-sizing: border-box; }
+        body { font-family: 'Nunito', sans-serif; font-size: 11px; margin: 0; background: var(--bg); color: var(--text); }
+
+        .no-print {
+            background: #2d3436; padding: 12px 24px;
+            display: flex; justify-content: space-between; align-items: center;
+            color: white; position: sticky; top: 0; z-index: 1000;
+        }
+        .no-print button {
+            background: var(--primary); border: none; color: white;
+            padding: 8px 20px; border-radius: 20px; font-weight: bold; cursor: pointer;
+        }
+
+        .informe-wrapper { page-break-after: always; padding: 15px 0; }
+        .informe-wrapper:last-child { page-break-after: auto; }
+
+        .header { display: flex; flex-direction: column; align-items: center; text-align: center; background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); padding: 14px 10px 12px; border-radius: 18px; margin-bottom: 15px; border: 2px dashed #fff; }
+        .header .logo img { width: 80px; height: auto; display: block; margin: 0 auto 6px; filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.12)); }
+        .header .inst-lema { font-family: 'Baloo 2', cursive; font-size: 1.2em; font-weight: 800; color: #4a0e0e; margin: 2px 0 0; }
+        .header .inst-legal { font-size: 0.82em; font-weight: 700; color: #636e72; margin: 3px 0 0; letter-spacing: 0.3px; }
+        .boletin-container {
+            max-width: 190mm; margin: 0 auto; background: #fff;
+            padding: 15px; border: 4px solid var(--soft-blue); border-radius: 25px;
+        }
+
+        .header-sub { font-family: 'Baloo 2', cursive; font-size: 1.1em; color: var(--secondary); margin-top: 6px; text-transform: uppercase; letter-spacing: 1px; }
+
+        .info-estudiante { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        .chip { background: #fff; border: 2px solid var(--soft-blue); padding: 8px 12px; border-radius: 12px; }
+        .label { font-size: 0.7em; font-weight: 800; color: var(--soft-blue); text-transform: uppercase; display: block; }
+        .value { font-size: 1.1em; font-weight: 800; color: #2d3436; }
+
+        table { width: 100%; border-collapse: separate; border-spacing: 0 4px; margin-bottom: 15px; }
+        th { background: var(--secondary); color: white; padding: 8px 6px; font-family: 'Baloo 2'; border-radius: 8px; font-size: 10px; }
+        th:first-child { text-align: left; padding-left: 12px; }
+
+        tr.area-row td { background: var(--soft-blue); color: white; font-family: 'Baloo 2'; font-weight: 700; padding: 5px 10px; border-radius: 6px; font-size: 10px; }
+
+        tbody tr:not(.area-row) td { background: #f8f9fa; padding: 5px 6px; border-bottom: 1px dashed #dee2e6; text-align: center; font-weight: 700; }
+        tbody tr:not(.area-row) td:first-child { text-align: left; padding-left: 14px; border-radius: 8px 0 0 8px; }
+        tbody tr:not(.area-row) td:last-child { border-radius: 0 8px 8px 0; }
+
+        .nota-sup  { color: #1a6b1a; font-weight: 800; }
+        .nota-alto { color: #1565a6; font-weight: 800; }
+        .nota-bas  { color: #c47a00; font-weight: 800; }
+        .nota-bajo { color: #b03a2e; font-weight: 800; }
+        .nota-null { color: #aaa; }
+        .fila-total td { background: #e8f4fd !important; font-weight: 800; font-size: 11.5px; border-top: 2px solid var(--soft-blue); border-radius: 8px; }
+
+        .veredicto { border: 2px solid var(--accent); background: #fff9db; border-radius: 15px; padding: 12px 15px; margin-bottom: 15px; }
+        .veredicto-titulo { font-family: 'Baloo 2', cursive; font-size: 1.1em; color: #5c4b00; margin-bottom: 8px; }
+        .veredicto p { margin: 4px 0; font-weight: 700; }
+        .veredicto .situacion { font-size: 1.3em; font-weight: 800; color: var(--secondary); }
+        .veredicto .obs { font-size: 0.85em; border-top: 1px dashed #ccc; margin-top: 8px; padding-top: 6px; color: #555; }
+
+        .firmas { display: flex; justify-content: space-around; margin-top: 25px; text-align: center; }
+        .firma-col { width: 40%; }
+        .firma-linea { border-top: 3px solid var(--soft-blue); width: 80%; margin: 5px auto; }
+        .firma-cargo  { font-size: 0.8em; font-weight: 700; color: #636e72; }
+
+        .firma-digital-texto { font-family: 'Great Vibes', cursive; font-size: 24px; font-weight: bold; color: #16315c; transform: rotate(-1.5deg); display: block; line-height: 1; margin: 0 auto -2px auto; }
+        @media print { .no-print { display: none; } }
+    </style>
+</head>
+<body>
+    <div class="no-print">
+        <span style="font-weight:700;">{{ carga.Nombre_Grupo }} — Informes Finales</span>
+        <button onclick="window.print()">🖨️ Imprimir Todo</button>
+    </div>
+
+    {% for i in informes %}
+    <div class="informe-wrapper">
+        <div class="boletin-container">
+
+                <div class="header">
+                    <div class="logo">
+                        <img src="{{ url_for('static', filename='img/logo_colegio.png') }}" alt="Logo Chiquilladas">
+                    </div>
+                    <p class="inst-lema">Educando con Amor y Diversión</p>
+                    <p class="inst-legal">Res. 002336 de 2024 | DANE 354498002494</p>
+                </div>
+                <div class="header-sub">✦ Informe Evaluativo Final — Año Lectivo 2026 ✦</div>
+
+
+            <p class="inst-lema">Educando con Amor y Diversión</p>
+                <p class="inst-legal">Res. 002336 de 2024 | DANE 354498002494</p>
+            </div>
+
+            <div class="header-sub">✦ Informe Evaluativo Final — Año Lectivo 2026 ✦</div>
+
+            <div class="info-estudiante">
+                <div class="chip">
+                    <span class="label">Estudiante</span>
+                    <span class="value">{{ i.estudiante.Nombres | upper }} {{ i.estudiante.Apellidos | upper }}</span>
+                </div>
+                <div class="chip">
+                    <span class="label">Grado</span>
+                    <span class="value">{{ i.estudiante.Nombre_Grupo }}</span>
+                </div>
+                <div class="chip">
+                    <span class="label">Fecha</span>
+                    <span class="value">{{ i.fecha_actual }}</span>
+                </div>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width:40%;">Área / Asignatura</th>
+                        <th>P1</th><th>P2</th><th>P3</th><th>P4</th>
+                        <th>DEFINITIVA</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% set area_actual = namespace(nombre='') %}
+                    {% for m in i.materias %}
+                        {% if m.Nombre_Area != area_actual.nombre %}
+                            {% set area_actual.nombre = m.Nombre_Area %}
+                            <tr class="area-row"><td colspan="6">{{ m.Nombre_Area }}</td></tr>
+                        {% endif %}
+                        {% macro cls(n) %}{{ 'nota-sup' if n and n >= 4.5 else 'nota-alto' if n and n >= 4.0 else 'nota-bas' if n and n >= 3.0 else 'nota-bajo' if n else 'nota-null' }}{% endmacro %}
+                        <tr>
+                            <td>{{ m.Materia }}</td>
+                            <td class="{{ cls(m.p1) }}">{{ '%.1f'|format(m.p1) if m.p1 is not none else '—' }}</td>
+                            <td class="{{ cls(m.p2) }}">{{ '%.1f'|format(m.p2) if m.p2 is not none else '—' }}</td>
+                            <td class="{{ cls(m.p3) }}">{{ '%.1f'|format(m.p3) if m.p3 is not none else '—' }}</td>
+                            <td class="{{ cls(m.p4) }}">{{ '%.1f'|format(m.p4) if m.p4 is not none else '—' }}</td>
+                            <td class="{{ cls(m.def) }}" style="font-weight:800;">
+                                {{ '%.1f'|format(m.def) if m.def is not none else '—' }}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    {% if i.promedio_general_final is not none %}
+                    <tr class="fila-total">
+                        <td style="text-align:left; padding-left:14px;">PROMEDIO GENERAL FINAL</td>
+                        <td>—</td><td>—</td><td>—</td><td>—</td>
+                        <td class="{{ 'nota-sup' if i.promedio_general_final >= 4.5 else 'nota-alto' if i.promedio_general_final >= 4.0 else 'nota-bas' if i.promedio_general_final >= 3.0 else 'nota-bajo' }}">
+                            {{ '%.1f'|format(i.promedio_general_final) }}
+                        </td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+
+            <div class="veredicto">
+                <div class="veredicto-titulo">🎓 Resultado Académico Final</div>
+                <p><strong>Estado:</strong> {{ i.anual.Concepto_Final | upper if i.anual and i.anual.Concepto_Final else 'PENDIENTE' }}</p>
+                {% if i.anual and i.anual.Promovido_A %}
+                <p class="situacion">🏅 {{ 'PROMOVIDO AL GRADO ' + (i.anual.Promovido_A | upper) }}</p>
+                {% endif %}
+                {% if i.anual and i.anual.Observaciones_Generales %}
+                <p class="obs">{{ i.anual.Observaciones_Generales }}</p>
+                {% endif %}
+            </div>
+
+            <div class="firmas">
+                <div class="firma-col">
+                    <span class="firma-digital-texto">{{ i.titular_nombre | title }}</span>
+                    <div class="firma-linea"></div>
+                    <div class="firma-cargo">Docente Titular</div>
+                </div>
+                <div class="firma-col">
+                    <span class="firma-digital-texto">{{ i.directora_nombre | title }}</span>
+                    <div class="firma-linea"></div>
+                    <div class="firma-cargo">Directora</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    {% endfor %}
+</body>
+</html>

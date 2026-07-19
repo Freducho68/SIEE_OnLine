@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Asignaturas</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #f0f2f5;
+        }
+        .btn-asignatura {
+            transition: all 0.3s ease;
+        }
+        .btn-asignatura:hover {
+            transform: translateY(-2px);
+        }
+        .table-asignaturas th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-custom {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+        }
+        .btn-custom:hover {
+            transform: translateY(-2px);
+            color: white;
+        }
+        .badge-dim {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+            color: #c0392b;
+        }
+        .badge-basica {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            color: #2980b9;
+        }
+        .area-titulo {
+            background-color: #e9ecef;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-dark bg-dark mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('admin_bp.panel') }}">
+                <i class="fas fa-arrow-left me-2"></i>Volver al Panel
+            </a>
+            <span class="navbar-text">
+                <i class="fas fa-book me-2"></i>Gestión de Asignaturas
+            </span>
+        </div>
+    </nav>
+
+    <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-triangle' }} me-2"></i>
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Estadísticas -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card text-center border-primary">
+                    <div class="card-body">
+                        <i class="fas fa-graduation-cap fa-2x text-primary"></i>
+                        <h3 class="mt-2 mb-0">{{ asignaturas_basica|length }}</h3>
+                        <small class="text-muted">Asignaturas Básica</small>
+                        <p class="small text-muted mb-0">Notas 0 a 5</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card text-center border-warning">
+                    <div class="card-body">
+                        <i class="fas fa-child fa-2x text-warning"></i>
+                        <h3 class="mt-2 mb-0">{{ asignaturas_dim|length }}</h3>
+                        <small class="text-muted">Asignaturas DIM</small>
+                        <p class="small text-muted mb-0">Notas 3, 4, 5 con emoticonos 😞😐😊</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow">
+            <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-list me-2"></i>Lista de Asignaturas por Área</h5>
+                <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#modalCrearAsignatura">
+                    <i class="fas fa-plus me-1"></i>Nueva Asignatura
+                </button>
+            </div>
+            <div class="card-body">
+                {% if asignaturas_por_area %}
+                    {% for area, materias_area in asignaturas_por_area.items() %}
+                        <div class="mt-3 mb-4">
+                            <h5 class="bg-secondary text-white p-2 rounded">
+                                <i class="fas fa-folder-open me-2"></i>{{ area }}
+                            </h5>
+                            <div class="table-responsive">
+                                <table class="table table-hover table-asignaturas">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th><i class="fas fa-book me-1"></i>Asignatura</th>
+                                            <th><i class="fas fa-tag me-1"></i>Tipo</th>
+                                            <th><i class="fas fa-chart-line me-1"></i>Sistema de Notas</th>
+                                            <th><i class="fas fa-cogs me-1"></i>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for materia in materias_area %}
+                                        <tr>
+                                            <td>{{ materia.ID_Materia }}</td>
+                                            <td>
+                                                <strong>{{ materia.Nombre_Materia }}</strong>
+                                             </td>
+                                            <td>
+                                                {% if materia.Es_DIM %}
+                                                    <span class="badge-dim badge px-2 py-1">
+                                                        <i class="fas fa-child me-1"></i>DIM - Preescolar
+                                                    </span>
+                                                {% else %}
+                                                    <span class="badge-basica badge px-2 py-1">
+                                                        <i class="fas fa-graduation-cap me-1"></i>Educación Básica
+                                                    </span>
+                                                {% endif %}
+                                             </td>
+                                            <td>
+                                                {% if materia.Es_DIM %}
+                                                    <span class="text-warning">
+                                                        <i class="fas fa-smile me-1"></i> 3 😞 · 4 😐 · 5 😊
+                                                    </span>
+                                                {% else %}
+                                                    <span class="text-primary">
+                                                        <i class="fas fa-chart-line me-1"></i> 0 a 5 (décimas)
+                                                    </span>
+                                                {% endif %}
+                                             </td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <button type="button" class="btn btn-sm btn-warning btn-asignatura" 
+                                                            data-bs-toggle="modal" 
+                                                            data-bs-target="#modalEditarAsignatura"
+                                                            data-id="{{ materia.ID_Materia }}"
+                                                            data-nombre="{{ materia.Nombre_Materia }}">
+                                                        <i class="fas fa-edit"></i>
+                                                    </button>
+                                                    <button type="button" class="btn btn-sm btn-danger btn-asignatura"
+                                                            data-bs-toggle="modal"
+                                                            data-bs-target="#modalEliminarAsignatura"
+                                                            data-id="{{ materia.ID_Materia }}"
+                                                            data-nombre="{{ materia.Nombre_Materia }}">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </div>
+                                             </td>
+                                         </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="alert alert-info text-center">
+                        <i class="fas fa-info-circle me-2"></i>
+                        No hay asignaturas registradas.
+                        <button type="button" class="btn btn-sm btn-primary ms-3" data-bs-toggle="modal" data-bs-target="#modalCrearAsignatura">
+                            <i class="fas fa-plus me-1"></i>Crear la primera asignatura
+                        </button>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Leyenda de emoticonos DIM -->
+        <div class="card mt-4">
+            <div class="card-body">
+                <h6><i class="fas fa-info-circle me-2"></i>Sistema de Calificación Preescolar (DIM)</h6>
+                <div class="row text-center">
+                    <div class="col-md-4">
+                        <div class="alert alert-warning mb-0">
+                            <span style="font-size: 2rem;">😞</span><br>
+                            <strong>3.0 - Básico</strong><br>
+                            <small>El estudiante necesita reforzar</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="alert alert-info mb-0">
+                            <span style="font-size: 2rem;">😐</span><br>
+                            <strong>4.0 - Alto</strong><br>
+                            <small>Buen desempeño</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="alert alert-success mb-0">
+                            <span style="font-size: 2rem;">😊</span><br>
+                            <strong>5.0 - Superior</strong><br>
+                            <small>Excelente desempeño</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Crear Asignatura -->
+    <div class="modal fade" id="modalCrearAsignatura" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-plus-circle me-2"></i>Crear Nueva Asignatura</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="POST" action="{{ url_for('asignaturas_bp.crear_asignatura') }}">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Nombre de la Asignatura <span class="text-danger">*</span></label>
+                            <input type="text" name="nombre_materia" class="form-control" required 
+                                   placeholder="Ej: Matemáticas, Español, DIM - Prejardín, etc.">
+                            <small class="text-muted">Para preescolar, usa el prefijo "DIM" (Ej: DIM - Prejardín)</small>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Área Académica (opcional)</label>
+                            <select name="nombre_area" class="form-select">
+                                <option value="">Seleccionar área</option>
+                                <option value="HUMANIDADES">HUMANIDADES</option>
+                                <option value="MATEMATICAS">MATEMATICAS</option>
+                                <option value="CIENCIAS SOCIALES">CIENCIAS SOCIALES</option>
+                                <option value="CIENCIAS NATURALES">CIENCIAS NATURALES</option>
+                                <option value="ETICA">ETICA</option>
+                                <option value="TECNOLOGIA E INFORMATICA">TECNOLOGIA E INFORMATICA</option>
+                                <option value="RELIGION">RELIGION</option>
+                                <option value="EDUCACION ARTISTICA">EDUCACION ARTISTICA</option>
+                                <option value="EDUCACION FISICA">EDUCACION FISICA</option>
+                                <option value="CONVIVENCIA">CONVIVENCIA</option>
+                                <option value="COGNITIVA">COGNITIVA</option>
+                                <option value="COMUNICATIVA">COMUNICATIVA</option>
+                                <option value="ESTETICA">ESTETICA</option>
+                                <option value="CORPORAL">CORPORAL</option>
+                                <option value="SOCIOAFECTIVA">SOCIOAFECTIVA</option>
+                                <option value="ESPIRITUAL">ESPIRITUAL</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-custom">Crear Asignatura</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Editar Asignatura -->
+    <div class="modal fade" id="modalEditarAsignatura" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-edit me-2"></i>Editar Asignatura</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="POST" id="formEditarAsignatura">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Nombre de la Asignatura <span class="text-danger">*</span></label>
+                            <input type="text" name="nombre_materia" id="edit_nombre_asignatura" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-custom">Guardar Cambios</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Eliminar Asignatura -->
+    <div class="modal fade" id="modalEliminarAsignatura" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title"><i class="fas fa-exclamation-triangle me-2"></i>Eliminar Asignatura</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>¿Estás seguro de que deseas eliminar la asignatura <strong id="delete_nombre_asignatura"></strong>?</p>
+                    <p class="text-danger"><small><i class="fas fa-info-circle me-1"></i>Esta acción no se puede deshacer.</small></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <a href="#" id="btnEliminarAsignatura" class="btn btn-danger">Eliminar</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Modal Editar - Cargar datos
+        const modalEditar = document.getElementById('modalEditarAsignatura');
+        modalEditar.addEventListener('show.bs.modal', function(event) {
+            const button = event.relatedTarget;
+            const id = button.getAttribute('data-id');
+            const nombre = button.getAttribute('data-nombre');
+            
+            const form = document.getElementById('formEditarAsignatura');
+            form.action = "{{ url_for('asignaturas_bp.editar_asignatura', id_materia=0) }}".replace('0', id);
+            
+            document.getElementById('edit_nombre_asignatura').value = nombre;
+        });
+        
+        // Modal Eliminar - Cargar datos
+        const modalEliminar = document.getElementById('modalEliminarAsignatura');
+        modalEliminar.addEventListener('show.bs.modal', function(event) {
+            const button = event.relatedTarget;
+            const id = button.getAttribute('data-id');
+            const nombre = button.getAttribute('data-nombre');
+            
+            document.getElementById('delete_nombre_asignatura').textContent = nombre;
+            document.getElementById('btnEliminarAsignatura').href = "{{ url_for('asignaturas_bp.eliminar_asignatura', id_materia=0) }}".replace('0', id);
+        });
+    </script>
+</body>
+</html>

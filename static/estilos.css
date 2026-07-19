@@ -1,0 +1,561 @@
+/* ============================================
+   SISTEMA DE GESTIÓN ACADÉMICA
+   Estilos personalizados
+   ============================================ */
+
+/* ==================== RESET Y ESTILOS GENERALES ==================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f0f2f5;
+    color: #333;
+    line-height: 1.5;
+}
+
+/* ==================== BARRA DE NAVEGACIÓN ==================== */
+
+.navbar-custom {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.navbar-custom .navbar-brand,
+.navbar-custom .navbar-text {
+    color: white !important;
+}
+
+/* ==================== TARJETAS (CARDS) ==================== */
+
+.card {
+    border-radius: 12px;
+    overflow: hidden;
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.card-header {
+    font-weight: 600;
+    border-bottom: none;
+}
+
+.card-header.bg-dark {
+    background: linear-gradient(135deg, #2c3e50 0%, #1a1a2e 100%) !important;
+}
+
+.card-shadow {
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+}
+
+.card-shadow:hover {
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+/* ==================== BOTONES ==================== */
+
+.btn {
+    border-radius: 8px;
+    padding: 8px 20px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #5a67d8 0%, #6b46a0 100%);
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #00d27a 0%, #00994c 100%);
+    border: none;
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #e63757 0%, #c91a3b 100%);
+    border: none;
+}
+
+.btn-warning {
+    background: linear-gradient(135deg, #f5803e 0%, #e5671a 100%);
+    border: none;
+    color: white;
+}
+
+.btn-info {
+    background: linear-gradient(135deg, #39afd1 0%, #1e8ab3 100%);
+    border: none;
+    color: white;
+}
+
+.btn-outline-secondary:hover {
+    transform: translateY(-2px);
+}
+
+/* ==================== TABLAS ==================== */
+
+.table {
+    margin-bottom: 0;
+}
+
+.table th {
+    font-weight: 600;
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.table-hover tbody tr:hover {
+    background-color: #f8f9fa;
+    transition: all 0.2s ease;
+}
+
+.table-responsive {
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+/* Scroll personalizado para tablas */
+.table-responsive::-webkit-scrollbar {
+    height: 8px;
+    width: 8px;
+}
+
+.table-responsive::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* ==================== FORMULARIOS ==================== */
+
+.form-control, .form-select {
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    padding: 10px 12px;
+    transition: all 0.2s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    outline: none;
+}
+
+.form-label {
+    font-weight: 500;
+    margin-bottom: 8px;
+    color: #333;
+}
+
+/* ==================== MODALES ==================== */
+
+.modal-header {
+    border-bottom: none;
+    padding: 20px 25px;
+}
+
+.modal-header .btn-close {
+    filter: brightness(0) invert(1);
+}
+
+.modal-content {
+    border-radius: 15px;
+    border: none;
+    overflow: hidden;
+}
+
+.modal-body {
+    padding: 25px;
+}
+
+.modal-footer {
+    border-top: 1px solid #eee;
+    padding: 15px 25px;
+}
+
+/* ==================== ALERTAS ==================== */
+
+.alert {
+    border-radius: 10px;
+    border: none;
+    padding: 12px 20px;
+}
+
+.alert-success {
+    background: linear-gradient(135deg, #d4fc79 0%, #96e6a1 100%);
+    color: #1e4620;
+}
+
+.alert-danger {
+    background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+    color: #8b0000;
+}
+
+.alert-warning {
+    background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+    color: #7c5c00;
+}
+
+.alert-info {
+    background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+    color: #0c5460;
+}
+
+/* ==================== BADGES ==================== */
+
+.badge {
+    font-weight: 500;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+}
+
+/* ==================== AVATARES ==================== */
+
+.avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: white;
+}
+
+.avatar-sm {
+    width: 32px;
+    height: 32px;
+    font-size: 0.8rem;
+}
+
+.avatar-lg {
+    width: 60px;
+    height: 60px;
+    font-size: 1.5rem;
+}
+
+/* ==================== PAGINACIÓN ==================== */
+
+.pagination .page-link {
+    border-radius: 8px;
+    margin: 0 3px;
+    color: #667eea;
+    border: 1px solid #dee2e6;
+}
+
+.pagination .page-item.active .page-link {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-color: #667eea;
+    color: white;
+}
+
+.pagination .page-link:hover {
+    background: #f0f0f0;
+    transform: translateY(-2px);
+}
+
+/* ==================== SPLASH SCREEN ==================== */
+
+.splash-container {
+    position: relative;
+    z-index: 2;
+}
+
+/* ==================== IMPRESIÓN ==================== */
+
+@media print {
+    .no-print {
+        display: none !important;
+    }
+    
+    .card {
+        box-shadow: none !important;
+        border: 1px solid #ddd !important;
+    }
+    
+    .table {
+        font-size: 10pt !important;
+    }
+    
+    .btn {
+        display: none !important;
+    }
+    
+    body {
+        background: white;
+        padding: 0;
+        margin: 0;
+    }
+}
+
+/* ==================== ANIMACIONES ==================== */
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.05);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease-in;
+}
+
+.fade-in-up {
+    animation: fadeInUp 0.5s ease-out;
+}
+
+.slide-in {
+    animation: slideIn 0.3s ease-out;
+}
+
+/* ==================== UTILIDADES ==================== */
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.text-gradient {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.bg-gradient-success {
+    background: linear-gradient(135deg, #00d27a 0%, #00994c 100%);
+}
+
+.bg-gradient-danger {
+    background: linear-gradient(135deg, #e63757 0%, #c91a3b 100%);
+}
+
+.bg-gradient-warning {
+    background: linear-gradient(135deg, #f5803e 0%, #e5671a 100%);
+}
+
+.bg-gradient-info {
+    background: linear-gradient(135deg, #39afd1 0%, #1e8ab3 100%);
+}
+
+/* ==================== RESPONSIVE ==================== */
+
+@media (max-width: 768px) {
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .btn {
+        padding: 6px 12px;
+        font-size: 0.85rem;
+    }
+    
+    .table {
+        font-size: 0.8rem;
+    }
+    
+    .modal-body {
+        padding: 15px;
+    }
+}
+
+/* ==================== SELECT2 PERSONALIZADO ==================== */
+
+.select2-container--bootstrap-5 .select2-selection {
+    border-radius: 8px;
+    border-color: #ddd;
+    min-height: 42px;
+}
+
+.select2-container--bootstrap-5 .select2-selection--single .select2-selection__rendered {
+    line-height: 40px;
+    padding-left: 12px;
+}
+
+.select2-container--bootstrap-5 .select2-selection--single .select2-selection__arrow {
+    height: 40px;
+}
+
+.select2-dropdown {
+    border-radius: 8px;
+    border-color: #ddd;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.select2-container--bootstrap-5 .select2-results__option--highlighted {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+/* ==================== DROPZONE PARA CARGA MASIVA ==================== */
+
+.drop-zone {
+    transition: all 0.3s ease;
+}
+
+.drop-zone.dragover {
+    border-color: #28a745;
+    background: #e8f5e9;
+}
+
+/* ==================== PLANILLA DE NOTAS ==================== */
+
+.nota-input {
+    text-align: center;
+}
+
+.nota-input:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+.indicador-textarea {
+    resize: vertical;
+    font-size: 0.8rem;
+}
+
+.indicador-textarea:focus {
+    border-color: #667eea;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.25);
+}
+
+/* ==================== BOLETÍN ==================== */
+
+.desempeno-superior {
+    background-color: #d4edda;
+    color: #155724;
+    font-weight: bold;
+    border-radius: 20px;
+    padding: 4px 12px;
+    display: inline-block;
+}
+
+.desempeno-alto {
+    background-color: #d1ecf1;
+    color: #0c5460;
+    font-weight: bold;
+    border-radius: 20px;
+    padding: 4px 12px;
+    display: inline-block;
+}
+
+.desempeno-basico {
+    background-color: #fff3cd;
+    color: #856404;
+    font-weight: bold;
+    border-radius: 20px;
+    padding: 4px 12px;
+    display: inline-block;
+}
+
+.desempeno-bajo {
+    background-color: #f8d7da;
+    color: #721c24;
+    font-weight: bold;
+    border-radius: 20px;
+    padding: 4px 12px;
+    display: inline-block;
+}
+
+/* ==================== ESTADÍSTICAS ==================== */
+
+.stats-number {
+    font-size: 2rem;
+    font-weight: bold;
+    margin: 0;
+}
+
+.stats-label {
+    color: #6c757d;
+    font-size: 0.85rem;
+}
+
+/* ==================== TOOLBAR FIJA ==================== */
+
+.toolbar-fixed {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: white;
+    padding: 10px 0;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #dee2e6;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+/* ==================== DIM (PREESCOLAR) ==================== */
+
+.badge-dim {
+    background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+    color: #c0392b;
+}
+
+.badge-basica {
+    background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+    color: #2980b9;
+}

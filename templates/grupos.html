@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Grupos</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #f0f2f5;
+        }
+        .btn-grupo {
+            transition: all 0.3s ease;
+        }
+        .btn-grupo:hover {
+            transform: translateY(-2px);
+        }
+        .table-grupos th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-custom {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+        }
+        .btn-custom:hover {
+            transform: translateY(-2px);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-dark bg-dark mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('admin_bp.panel') }}">
+                <i class="fas fa-arrow-left me-2"></i>Volver al Panel
+            </a>
+            <span class="navbar-text">
+                <i class="fas fa-users me-2"></i>Gestión de Grupos
+            </span>
+        </div>
+    </nav>
+
+    <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-triangle' }} me-2"></i>
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="card shadow">
+            <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-list me-2"></i>Lista de Grupos</h5>
+                <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#modalCrearGrupo">
+                    <i class="fas fa-plus me-1"></i>Nuevo Grupo
+                </button>
+            </div>
+            <div class="card-body">
+                {% if grupos %}
+                <div class="table-responsive">
+                    <table class="table table-hover table-grupos">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th><i class="fas fa-tag me-1"></i>Nombre del Grupo</th>
+                                <th><i class="fas fa-layer-group me-1"></i>Nivel</th>
+                                <th><i class="fas fa-cogs me-1"></i>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for grupo in grupos %}
+                            <tr>
+                                <td>{{ grupo.ID_Grupo }}</td>
+                                <td><strong>{{ grupo.Nombre_Grupo }}</strong></td>
+                                <td>
+                                    {% if grupo.Nombre_Nivel %}
+                                        <span class="badge bg-info">{{ grupo.Nombre_Nivel }}</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Sin nivel</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <button type="button" class="btn btn-sm btn-warning btn-grupo" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#modalEditarGrupo"
+                                                data-id="{{ grupo.ID_Grupo }}"
+                                                data-nombre="{{ grupo.Nombre_Grupo }}"
+                                                data-nivel="{{ grupo.ID_Nivel }}">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-danger btn-grupo"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#modalEliminarGrupo"
+                                                data-id="{{ grupo.ID_Grupo }}"
+                                                data-nombre="{{ grupo.Nombre_Grupo }}">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-info text-center">
+                    <i class="fas fa-info-circle me-2"></i>
+                    No hay grupos registrados.
+                    <button type="button" class="btn btn-sm btn-primary ms-3" data-bs-toggle="modal" data-bs-target="#modalCrearGrupo">
+                        <i class="fas fa-plus me-1"></i>Crear el primer grupo
+                    </button>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Estadísticas -->
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="card text-center border-primary">
+                    <div class="card-body">
+                        <i class="fas fa-users fa-2x text-primary"></i>
+                        <h3 class="mt-2 mb-0">{{ grupos|length }}</h3>
+                        <small class="text-muted">Total Grupos</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card text-center border-info">
+                    <div class="card-body">
+                        <i class="fas fa-layer-group fa-2x text-info"></i>
+                        <h3 class="mt-2 mb-0">{{ niveles|length }}</h3>
+                        <small class="text-muted">Niveles Educativos</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Crear Grupo -->
+    <div class="modal fade" id="modalCrearGrupo" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-plus-circle me-2"></i>Crear Nuevo Grupo</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="POST" action="{{ url_for('grupos_bp.crear_grupo') }}">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Nombre del Grupo <span class="text-danger">*</span></label>
+                            <input type="text" name="nombre_grupo" class="form-control" required placeholder="Ej: Primero A, Jardín B, etc.">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Nivel</label>
+                            <select name="id_nivel" class="form-select">
+                                <option value="">Seleccionar nivel</option>
+                                {% for nivel in niveles %}
+                                    <option value="{{ nivel.ID_Nivel }}">{{ nivel.Nombre_Nivel }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-custom">Crear Grupo</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Editar Grupo -->
+    <div class="modal fade" id="modalEditarGrupo" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-edit me-2"></i>Editar Grupo</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="POST" id="formEditarGrupo">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Nombre del Grupo <span class="text-danger">*</span></label>
+                            <input type="text" name="nombre_grupo" id="edit_nombre_grupo" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Nivel</label>
+                            <select name="id_nivel" id="edit_id_nivel" class="form-select">
+                                <option value="">Seleccionar nivel</option>
+                                {% for nivel in niveles %}
+                                    <option value="{{ nivel.ID_Nivel }}">{{ nivel.Nombre_Nivel }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-custom">Guardar Cambios</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Eliminar Grupo -->
+    <div class="modal fade" id="modalEliminarGrupo" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title"><i class="fas fa-exclamation-triangle me-2"></i>Eliminar Grupo</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>¿Estás seguro de que deseas eliminar el grupo <strong id="delete_nombre_grupo"></strong>?</p>
+                    <p class="text-danger"><small><i class="fas fa-info-circle me-1"></i>Esta acción no se puede deshacer.</small></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <a href="#" id="btnEliminarGrupo" class="btn btn-danger">Eliminar</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Modal Editar - Cargar datos
+        const modalEditar = document.getElementById('modalEditarGrupo');
+        modalEditar.addEventListener('show.bs.modal', function(event) {
+            const button = event.relatedTarget;
+            const id = button.getAttribute('data-id');
+            const nombre = button.getAttribute('data-nombre');
+            const nivel = button.getAttribute('data-nivel');
+            
+            const form = document.getElementById('formEditarGrupo');
+            form.action = "{{ url_for('grupos_bp.editar_grupo', id_grupo=0) }}".replace('0', id);
+            
+            document.getElementById('edit_nombre_grupo').value = nombre;
+            document.getElementById('edit_id_nivel').value = nivel || '';
+        });
+        
+        // Modal Eliminar - Cargar datos
+        const modalEliminar = document.getElementById('modalEliminarGrupo');
+        modalEliminar.addEventListener('show.bs.modal', function(event) {
+            const button = event.relatedTarget;
+            const id = button.getAttribute('data-id');
+            const nombre = button.getAttribute('data-nombre');
+            
+            document.getElementById('delete_nombre_grupo').textContent = nombre;
+            document.getElementById('btnEliminarGrupo').href = "{{ url_for('grupos_bp.eliminar_grupo', id_grupo=0) }}".replace('0', id);
+        });
+    </script>
+</body>
+</html>
