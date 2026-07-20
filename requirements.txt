@@ -7,3 +7,4 @@ Pillow
 python-dotenv==1.0.0
 setuptools
 gunicorn==21.2.0
+whitenoise==6.6.0
