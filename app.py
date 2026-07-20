@@ -7,11 +7,17 @@ from flask import Flask, render_template, session, redirect, url_for
 
 
 from flask import Flask
+
+from whitenoise import WhiteNoise
 import os
 
 app = Flask(__name__, 
     static_folder=os.path.join(os.path.dirname(__file__), 'static'),
     static_url_path='/static')
+
+app.wsgi_app = WhiteNoise(app.wsgi_app, root=os.path.join(os.path.dirname(__file__), 'static'))
+
+
 
 from config import Config
 from models import init_db
