@@ -5,6 +5,14 @@ import time
 import webbrowser
 from flask import Flask, render_template, session, redirect, url_for
 
+
+from flask import Flask
+import os
+
+app = Flask(__name__, 
+    static_folder=os.path.join(os.path.dirname(__file__), 'static'),
+    static_url_path='/static')
+
 from config import Config
 from models import init_db
 
