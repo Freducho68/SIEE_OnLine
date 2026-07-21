@@ -1,10 +1,9 @@
 Flask==3.0.0
-psycopg2
+psycopg2-binary==2.9.9
 Werkzeug==3.0.0
 pandas
-openpyxl==3.1.2
+openpyxl
 Pillow
-python-dotenv==1.0.0
-setuptools
+python-dotenv
 gunicorn==21.2.0
 whitenoise==6.6.0

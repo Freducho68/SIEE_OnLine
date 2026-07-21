@@ -1,6 +1,9 @@
 import os
 from flask import Flask, render_template, session, redirect, url_for
 
+# Importar WhiteNoise PRIMERO, antes de crear la app
+from whitenoise import WhiteNoise
+
 from config import Config
 from models import init_db
 
@@ -22,13 +25,8 @@ app = Flask(
     static_url_path='/static'
 )
 
-# Configurar WhiteNoise para servir archivos estáticos en producción (Railway)
-# Solo si está disponible
-try:
-    from whitenoise import WhiteNoise
-    app.wsgi_app = WhiteNoise(app.wsgi_app, root=STATIC_FOLDER, index_file=False)
-except ImportError:
-    pass  # WhiteNoise no disponible, Flask servirá los estáticos directamente
+# Aplicar WhiteNoise DESPUÉS de crear la app, ANTES de los blueprints
+app.wsgi_app = WhiteNoise(app.wsgi_app, root=STATIC_FOLDER, max_age=31536000)
 
 app.config.from_object(Config)
 app.config["SESSION_PERMANENT"] = False
