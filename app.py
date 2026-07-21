@@ -1,9 +1,6 @@
 import os
 from flask import Flask, render_template, session, redirect, url_for
 
-# Importar WhiteNoise PRIMERO, antes de crear la app
-from whitenoise import WhiteNoise
-
 from config import Config
 from models import init_db
 
@@ -17,16 +14,13 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 TEMPLATE_FOLDER = os.path.join(BASE_DIR, "templates")
 STATIC_FOLDER = os.path.join(BASE_DIR, "static")
 
-# Crear app Flask
+# Crear app Flask - SIN WhiteNoise
 app = Flask(
     __name__,
     template_folder=TEMPLATE_FOLDER,
     static_folder=STATIC_FOLDER,
     static_url_path='/static'
 )
-
-# Aplicar WhiteNoise DESPUÉS de crear la app, ANTES de los blueprints
-app.wsgi_app = WhiteNoise(app.wsgi_app, root=STATIC_FOLDER, max_age=31536000)
 
 app.config.from_object(Config)
 app.config["SESSION_PERMANENT"] = False
