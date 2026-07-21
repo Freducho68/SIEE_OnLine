@@ -1,23 +1,5 @@
 import os
-import sys
-import threading
-import time
-import webbrowser
 from flask import Flask, render_template, session, redirect, url_for
-
-
-from flask import Flask
-
-from whitenoise import WhiteNoise
-import os
-
-app = Flask(__name__, 
-    static_folder=os.path.join(os.path.dirname(__file__), 'static'),
-    static_url_path='/static')
-
-app.wsgi_app = WhiteNoise(app.wsgi_app, root=os.path.join(os.path.dirname(__file__), 'static'))
-
-
 
 from config import Config
 from models import init_db
@@ -27,16 +9,30 @@ def _as_bool(value, default=False):
         return default
     return str(value).strip().lower() in {"1", "true", "yes", "on"}
 
-def resource_path(relative_path):
-    """
-    Devuelve la ruta correcta tanto en desarrollo como cuando la app
-    está empaquetada con PyInstaller.
-    """
-    if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
-        base_path = sys._MEIPASS
-    else:
-        base_path = os.path.dirname(os.path.abspath(__file__))
-    return os.path.join(base_path, relative_path)
+# Obtener rutas base
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+TEMPLATE_FOLDER = os.path.join(BASE_DIR, "templates")
+STATIC_FOLDER = os.path.join(BASE_DIR, "static")
+
+# Crear app Flask
+app = Flask(
+    __name__,
+    template_folder=TEMPLATE_FOLDER,
+    static_folder=STATIC_FOLDER,
+    static_url_path='/static'
+)
+
+# Configurar WhiteNoise para servir archivos estáticos en producción (Railway)
+# Solo si está disponible
+try:
+    from whitenoise import WhiteNoise
+    app.wsgi_app = WhiteNoise(app.wsgi_app, root=STATIC_FOLDER, index_file=False)
+except ImportError:
+    pass  # WhiteNoise no disponible, Flask servirá los estáticos directamente
+
+app.config.from_object(Config)
+app.config["SESSION_PERMANENT"] = False
+app.config["SESSION_TYPE"] = "filesystem"
 
 # Importar blueprints
 from routes.auth import auth_bp
@@ -52,17 +48,6 @@ from routes.carga import carga_bp
 from routes.backups import backups_bp
 from routes.carga_masiva import carga_masiva_bp
 from routes.configuracion import configuracion_bp
-
-# Crear app con rutas explícitas para PyInstaller
-app = Flask(
-    __name__,
-    template_folder=resource_path("templates"),
-    static_folder=resource_path("static")
-)
-app.config.from_object(Config)
-
-app.config["SESSION_PERMANENT"] = False
-app.config["SESSION_TYPE"] = "filesystem"
 
 # Registrar blueprints
 app.register_blueprint(auth_bp)
@@ -120,13 +105,6 @@ def page_not_found(e):
 @app.errorhandler(500)
 def internal_server_error(e):
     return render_template("500.html"), 500
-
-def open_browser():
-    """
-    Abre el navegador unos segundos después de iniciar el servidor.
-    """
-    time.sleep(2)
-    webbrowser.open("http://127.0.0.1:5000")
 
 if __name__ == "__main__":
     debug_mode = _as_bool(os.environ.get("FLASK_DEBUG"), bool(app.config.get("DEBUG", False)))
